@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Caixa Organizadora</title>
+  <title>Organizer Box</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#0c0e13" />
@@ -83,7 +83,7 @@
     #language-selector > div > span { font-size:12px; color:rgba(255,255,255,.55); font-weight:400; }
 
     /* --- Dropdowns ----------------------------------------------- */
-    .custom-select-wrapper { position:relative; width:172px; }
+    .custom-select-wrapper { position:relative; width:188px; }
     .custom-select-button {
       width:100%; border:1px solid rgba(255,255,255,.16); border-radius:var(--r); padding:9px 12px;
       background:rgba(255,255,255,.07); color:#fff; display:flex; align-items:center;
@@ -169,7 +169,7 @@
 
     /* --- Buttons ------------------------------------------------- */
     .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .controls.bar { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+    .controls.bar { margin-top:14px; }
     .btn {
       --btn-bg:var(--ink); --btn-fg:#fff; --btn-bd:var(--ink);
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -195,7 +195,8 @@
       display:flex; justify-content:space-between; align-items:baseline; gap:14px;
       padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;
     }
-    .stat:last-child { border-bottom:none; padding-bottom:0; }
+    .stat:last-child,
+    .stat:has(+ .controls) { border-bottom:none; padding-bottom:0; }
     .stat span { color:var(--muted); }
     .stat b { font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; text-align:right; }
 
@@ -244,12 +245,6 @@
     }
     .swatch input[type="color"]:focus-visible { outline:none; box-shadow:var(--ring); }
 
-    footer {
-      max-width:1400px; margin:0 auto; padding:24px var(--gutter) 40px;
-      text-align:center; color:var(--muted); font-size:12px;
-    }
-    footer a { color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-strong); }
-
     @media (max-width:640px) {
       :root { --gutter:14px; }
       .card { padding:16px; border-radius:16px; }
@@ -289,7 +284,7 @@
       base: 'Aro inferior (mm)',
       rim: 'Aro superior (mm)',
       corner: 'Raio dos cantos (mm)',
-      shellHint: 'Os aros são as faixas maciças em cima e em baixo: a de cima dá rigidez à boca, a de baixo fecha a parede junto ao fundo. Com o aro inferior a 0 o favo começa logo acima do fundo, como na caixa original. O raio dos cantos nunca desce abaixo da espessura da parede.',
+      shellHint: 'Os aros são as faixas maciças em cima e em baixo: a de cima dá rigidez à boca, a de baixo fecha a parede junto ao fundo. Com o aro inferior a 0 o favo começa logo acima do fundo. O raio dos cantos nunca desce abaixo da espessura da parede.',
 
       gridCard: 'Grelha',
       cell: 'Célula (mm entre faces)',
@@ -315,14 +310,11 @@
       rowsCols: 'Fiadas × colunas',
 
       download: 'Descarregar STL',
-      downloadScad: 'Guardar .scad',
 
       warnRib: 'Uma nervura de {0} mm é fina para um bico de 0,4 mm. Acima de 1,2 mm imprime com paredes cheias.',
       warnBed: 'Com {0} × {1} mm a caixa não cabe em muitas mesas de impressão.',
       warnBand: 'A parede perfurada tem só {0} mm: não cabe nem uma fiada completa de favos.',
-      errSize: 'Estas medidas não dão uma caixa válida. Reduz a parede ou o raio dos cantos.',
-
-      footerText: 'Medidas em milímetros. STL binário, pronto para o fatiador.'
+      errSize: 'Estas medidas não dão uma caixa válida. Reduz a parede ou o raio dos cantos.'
     };
 
     window.I18N.en = {
@@ -343,7 +335,7 @@
       base: 'Bottom rim (mm)',
       rim: 'Top rim (mm)',
       corner: 'Corner radius (mm)',
-      shellHint: 'The rims are the solid bands at the top and bottom: the top one stiffens the mouth, the bottom one closes the wall off where it meets the floor. Set the bottom rim to 0 and the comb starts right above the floor, as on the original box. The corner radius never drops below the wall thickness.',
+      shellHint: 'The rims are the solid bands at the top and bottom: the top one stiffens the mouth, the bottom one closes the wall off where it meets the floor. Set the bottom rim to 0 and the comb starts right above the floor. The corner radius never drops below the wall thickness.',
 
       gridCard: 'Honeycomb',
       cell: 'Cell (mm across flats)',
@@ -369,14 +361,317 @@
       rowsCols: 'Rows × columns',
 
       download: 'Download STL',
-      downloadScad: 'Save .scad',
 
       warnRib: 'A {0} mm rib is thin for a 0.4 mm nozzle. Above 1.2 mm it prints as solid walls.',
       warnBed: 'At {0} × {1} mm the box will not fit many print beds.',
       warnBand: 'The perforated wall is only {0} mm tall: not even one full row of cells fits.',
-      errSize: 'These numbers do not make a valid box. Reduce the wall or the corner radius.',
+      errSize: 'These numbers do not make a valid box. Reduce the wall or the corner radius.'
+    };
 
-      footerText: 'Millimetres throughout. Binary STL, ready for the slicer.'
+    window.I18N.es = {
+      title: 'Caja organizadora',
+      headerHint: 'Cajas de panal a medida para impresión 3D',
+      language: 'Idioma',
+
+      sizeCard: 'Medidas exteriores',
+      preset: 'Modelo',
+      presetCustom: 'Personalizado',
+      width: 'Ancho X (mm)',
+      length: 'Largo Y (mm)',
+      height: 'Alto Z (mm)',
+
+      shellCard: 'Estructura',
+      wall: 'Pared (mm)',
+      floor: 'Fondo (mm)',
+      base: 'Aro inferior (mm)',
+      rim: 'Aro superior (mm)',
+      corner: 'Radio de las esquinas (mm)',
+      shellHint: 'Los aros son las bandas macizas arriba y abajo: el de arriba rigidiza la boca, el de abajo cierra la pared junto al fondo. Con el aro inferior en 0 el panal empieza justo encima del fondo. El radio de las esquinas nunca baja del espesor de la pared.',
+
+      gridCard: 'Panal',
+      cell: 'Celda (mm entre caras)',
+      rib: 'Nervio (mm)',
+      keepsScale: 'fijo',
+      gridHint: 'La celda y el nervio no cambian con el tamaño de la caja: una caja mayor lleva más celdas, del mismo tamaño.',
+      gridHole: 'Agujero hexagonal: {0} mm entre caras, {1} mm entre vértices.',
+
+      previewCard: 'Vista previa',
+      colour: 'Color',
+      maximize: 'Ampliar',
+      minimize: 'Reducir',
+      error3D: 'Tu navegador no pudo abrir una vista 3D (WebGL).',
+      dragHint: 'Arrastra para orbitar, rueda para acercar, Mayús+arrastrar para desplazar.',
+
+      summaryCard: 'Resumen',
+      inner: 'Interior',
+      capacity: 'Capacidad',
+      cells: 'Agujeros',
+      material: 'Material',
+      weight: 'Peso estimado',
+      triangles: 'Triángulos',
+      rowsCols: 'Filas × columnas',
+
+      download: 'Descargar STL',
+
+      warnRib: 'Un nervio de {0} mm es fino para una boquilla de 0,4 mm. Por encima de 1,2 mm imprime con paredes llenas.',
+      warnBed: 'Con {0} × {1} mm la caja no cabe en muchas mesas de impresión.',
+      warnBand: 'La pared perforada solo tiene {0} mm: no cabe ni una fila completa de celdas.',
+      errSize: 'Estas medidas no dan una caja válida. Reduce la pared o el radio de las esquinas.'
+    };
+
+    window.I18N.fr = {
+      title: 'Boîte organisatrice',
+      headerHint: 'Boîtes en nid d’abeille sur mesure pour l’impression 3D',
+      language: 'Langue',
+
+      sizeCard: 'Dimensions extérieures',
+      preset: 'Modèle',
+      presetCustom: 'Personnalisé',
+      width: 'Largeur X (mm)',
+      length: 'Longueur Y (mm)',
+      height: 'Hauteur Z (mm)',
+
+      shellCard: 'Structure',
+      wall: 'Paroi (mm)',
+      floor: 'Fond (mm)',
+      base: 'Rebord inférieur (mm)',
+      rim: 'Rebord supérieur (mm)',
+      corner: 'Rayon des coins (mm)',
+      shellHint: 'Les rebords sont les bandes pleines en haut et en bas : celui du haut rigidifie l’ouverture, celui du bas ferme la paroi près du fond. Avec le rebord inférieur à 0, le nid d’abeille commence juste au-dessus du fond. Le rayon des coins ne descend jamais sous l’épaisseur de la paroi.',
+
+      gridCard: 'Nid d’abeille',
+      cell: 'Cellule (mm entre faces)',
+      rib: 'Nervure (mm)',
+      keepsScale: 'fixe',
+      gridHint: 'La cellule et la nervure ne changent pas avec la taille de la boîte : une plus grande boîte a plus de cellules, de la même taille.',
+      gridHole: 'Ouverture hexagonale : {0} mm entre faces, {1} mm entre sommets.',
+
+      previewCard: 'Aperçu',
+      colour: 'Couleur',
+      maximize: 'Agrandir',
+      minimize: 'Réduire',
+      error3D: 'Votre navigateur n’a pas pu ouvrir une vue 3D (WebGL).',
+      dragHint: 'Faites glisser pour orbitrer, molette pour zoomer, Maj+glisser pour déplacer.',
+
+      summaryCard: 'Résumé',
+      inner: 'Intérieur',
+      capacity: 'Capacité',
+      cells: 'Ouvertures',
+      material: 'Matière',
+      weight: 'Poids estimé',
+      triangles: 'Triangles',
+      rowsCols: 'Rangées × colonnes',
+
+      download: 'Télécharger STL',
+
+      warnRib: 'Une nervure de {0} mm est fine pour une buse de 0,4 mm. Au-dessus de 1,2 mm elle s’imprime en parois pleines.',
+      warnBed: 'À {0} × {1} mm la boîte ne tient pas sur beaucoup de plateaux d’impression.',
+      warnBand: 'La paroi perforée n’a que {0} mm : même une rangée complète de cellules n’y tient pas.',
+      errSize: 'Ces mesures ne donnent pas une boîte valide. Réduisez la paroi ou le rayon des coins.'
+    };
+
+    window.I18N.de = {
+      title: 'Organizer-Box',
+      headerHint: 'Maßgeschneiderte Wabenboxen für den 3D-Druck',
+      language: 'Sprache',
+
+      sizeCard: 'Außenmaße',
+      preset: 'Vorlage',
+      presetCustom: 'Benutzerdefiniert',
+      width: 'Breite X (mm)',
+      length: 'Länge Y (mm)',
+      height: 'Höhe Z (mm)',
+
+      shellCard: 'Aufbau',
+      wall: 'Wand (mm)',
+      floor: 'Boden (mm)',
+      base: 'Unterer Rand (mm)',
+      rim: 'Oberer Rand (mm)',
+      corner: 'Eckenradius (mm)',
+      shellHint: 'Die Ränder sind die massiven Bänder oben und unten: der obere versteift die Öffnung, der untere schließt die Wand am Boden ab. Bei unterem Rand 0 beginnt die Wabe direkt über dem Boden. Der Eckenradius fällt nie unter die Wandstärke.',
+
+      gridCard: 'Wabe',
+      cell: 'Zelle (mm über Flachseiten)',
+      rib: 'Steg (mm)',
+      keepsScale: 'fest',
+      gridHint: 'Zelle und Steg skalieren nicht mit der Box: eine größere Box bekommt mehr Zellen derselben Größe.',
+      gridHole: 'Sechsecköffnung: {0} mm über Flachseiten, {1} mm über Ecken.',
+
+      previewCard: 'Vorschau',
+      colour: 'Farbe',
+      maximize: 'Vergrößern',
+      minimize: 'Verkleinern',
+      error3D: 'Dein Browser konnte keine 3D-Ansicht öffnen (WebGL).',
+      dragHint: 'Ziehen zum Drehen, Rad zum Zoomen, Umschalt+Ziehen zum Verschieben.',
+
+      summaryCard: 'Übersicht',
+      inner: 'Innen',
+      capacity: 'Fassungsvermögen',
+      cells: 'Öffnungen',
+      material: 'Material',
+      weight: 'Geschätztes Gewicht',
+      triangles: 'Dreiecke',
+      rowsCols: 'Reihen × Spalten',
+
+      download: 'STL herunterladen',
+
+      warnRib: 'Ein Steg von {0} mm ist dünn für eine 0,4-mm-Düse. Ab 1,2 mm wird er als volle Wand gedruckt.',
+      warnBed: 'Bei {0} × {1} mm passt die Box auf viele Druckbetten nicht.',
+      warnBand: 'Die gelochte Wand ist nur {0} mm hoch: es passt nicht einmal eine volle Zellenreihe.',
+      errSize: 'Diese Maße ergeben keine gültige Box. Reduziere die Wand oder den Eckenradius.'
+    };
+
+    window.I18N.it = {
+      title: 'Scatola organizer',
+      headerHint: 'Scatole a nido d’ape su misura per la stampa 3D',
+      language: 'Lingua',
+
+      sizeCard: 'Misure esterne',
+      preset: 'Modello',
+      presetCustom: 'Personalizzato',
+      width: 'Larghezza X (mm)',
+      length: 'Lunghezza Y (mm)',
+      height: 'Altezza Z (mm)',
+
+      shellCard: 'Struttura',
+      wall: 'Parete (mm)',
+      floor: 'Fondo (mm)',
+      base: 'Bordo inferiore (mm)',
+      rim: 'Bordo superiore (mm)',
+      corner: 'Raggio degli angoli (mm)',
+      shellHint: 'I bordi sono le fasce piene in alto e in basso: quello superiore irrigidisce la bocca, quello inferiore chiude la parete vicino al fondo. Con il bordo inferiore a 0 il nido d’ape inizia subito sopra il fondo. Il raggio degli angoli non scende mai sotto lo spessore della parete.',
+
+      gridCard: 'Nido d’ape',
+      cell: 'Cella (mm tra le facce)',
+      rib: 'Nervatura (mm)',
+      keepsScale: 'fisso',
+      gridHint: 'Cella e nervatura non cambiano con la dimensione della scatola: una più grande ha più celle, della stessa misura.',
+      gridHole: 'Apertura esagonale: {0} mm tra le facce, {1} mm tra i vertici.',
+
+      previewCard: 'Anteprima',
+      colour: 'Colore',
+      maximize: 'Ingrandisci',
+      minimize: 'Riduci',
+      error3D: 'Il browser non è riuscito ad aprire una vista 3D (WebGL).',
+      dragHint: 'Trascina per orbitare, rotella per zoomare, Maiusc+trascina per spostare.',
+
+      summaryCard: 'Riepilogo',
+      inner: 'Interno',
+      capacity: 'Capacità',
+      cells: 'Aperture',
+      material: 'Materiale',
+      weight: 'Peso stimato',
+      triangles: 'Triangoli',
+      rowsCols: 'File × colonne',
+
+      download: 'Scarica STL',
+
+      warnRib: 'Una nervatura di {0} mm è sottile per un ugello da 0,4 mm. Sopra 1,2 mm stampa come pareti piene.',
+      warnBed: 'A {0} × {1} mm la scatola non entra in molti piani di stampa.',
+      warnBand: 'La parete forata è alta solo {0} mm: non ci sta nemmeno una fila completa di celle.',
+      errSize: 'Queste misure non danno una scatola valida. Riduci la parete o il raggio degli angoli.'
+    };
+
+    window.I18N.zh = {
+      title: '收纳盒',
+      headerHint: '可定制尺寸的蜂窝收纳盒，用于 3D 打印',
+      language: '语言',
+
+      sizeCard: '外部尺寸',
+      preset: '预设',
+      presetCustom: '自定义',
+      width: '宽度 X（mm）',
+      length: '长度 Y（mm）',
+      height: '高度 Z（mm）',
+
+      shellCard: '壳体',
+      wall: '壁厚（mm）',
+      floor: '底厚（mm）',
+      base: '下边框（mm）',
+      rim: '上边框（mm）',
+      corner: '圆角半径（mm）',
+      shellHint: '边框是上下实心带：上边框加固开口，下边框在靠近底部处封闭壁面。下边框为 0 时，蜂窝从底面正上方开始。圆角半径不会低于壁厚。',
+
+      gridCard: '蜂窝',
+      cell: '单元格（对面距离 mm）',
+      rib: '筋厚（mm）',
+      keepsScale: '固定',
+      gridHint: '单元格和筋厚不随盒子变大：更大的盒子只有更多同尺寸的单元格。',
+      gridHole: '六角孔：对面 {0} mm，对角 {1} mm。',
+
+      previewCard: '预览',
+      colour: '颜色',
+      maximize: '放大',
+      minimize: '缩小',
+      error3D: '浏览器无法打开 3D 视图（WebGL）。',
+      dragHint: '拖动旋转，滚轮缩放，Shift+拖动平移。',
+
+      summaryCard: '摘要',
+      inner: '内部',
+      capacity: '容量',
+      cells: '孔数',
+      material: '材料',
+      weight: '估计重量',
+      triangles: '三角形',
+      rowsCols: '行 × 列',
+
+      download: '下载 STL',
+
+      warnRib: '{0} mm 的筋对 0.4 mm 喷嘴来说偏薄。超过 1.2 mm 会打成实心壁。',
+      warnBed: '{0} × {1} mm 的盒子放不进很多打印床。',
+      warnBand: '穿孔壁只有 {0} mm 高：连一整行单元格都放不下。',
+      errSize: '这些尺寸无法生成有效盒子。请减小壁厚或圆角半径。'
+    };
+
+    window.I18N.ja = {
+      title: 'オーガナイザーボックス',
+      headerHint: '3Dプリント用・寸法指定のハニカムボックス',
+      language: '言語',
+
+      sizeCard: '外形寸法',
+      preset: 'プリセット',
+      presetCustom: 'カスタム',
+      width: '幅 X（mm）',
+      length: '奥行き Y（mm）',
+      height: '高さ Z（mm）',
+
+      shellCard: '構造',
+      wall: '壁厚（mm）',
+      floor: '底厚（mm）',
+      base: '下リム（mm）',
+      rim: '上リム（mm）',
+      corner: '角の半径（mm）',
+      shellHint: 'リムは上下の無孔帯です。上は口を補強し、下は底付近の壁を閉じます。下リムを 0 にするとハニカムは底のすぐ上から始まります。角の半径は壁厚より小さくなりません。',
+
+      gridCard: 'ハニカム',
+      cell: 'セル（対面間 mm）',
+      rib: 'リブ（mm）',
+      keepsScale: '固定',
+      gridHint: 'セルとリブは箱の大きさに比例しません。大きい箱は同じ大きさのセルが増えるだけです。',
+      gridHole: '六角穴：対面 {0} mm、対角 {1} mm。',
+
+      previewCard: 'プレビュー',
+      colour: '色',
+      maximize: '拡大',
+      minimize: '縮小',
+      error3D: 'ブラウザで 3D 表示を開けませんでした（WebGL）。',
+      dragHint: 'ドラッグで回転、ホイールでズーム、Shift+ドラッグで平行移動。',
+
+      summaryCard: '概要',
+      inner: '内寸',
+      capacity: '容量',
+      cells: '穴数',
+      material: '材料',
+      weight: '推定重量',
+      triangles: '三角形',
+      rowsCols: '行 × 列',
+
+      download: 'STL をダウンロード',
+
+      warnRib: '{0} mm のリブは 0.4 mm ノズルには細いです。1.2 mm 超えると中実の壁として印刷されます。',
+      warnBed: '{0} × {1} mm では多くのプリントベッドに収まりません。',
+      warnBand: '穴あき壁の高さは {0} mm しかなく、セルの完全な1行すら入りません。',
+      errSize: 'この寸法では有効な箱になりません。壁厚か角の半径を小さくしてください。'
     };
   </script>
 
@@ -384,10 +679,9 @@
     // ---------------------------------------------------------------
     // Box engine
     //
-    // The same solid the OpenSCAD model in this repository describes: a
-    // squircle-cornered tray with a solid base, a honeycombed wall and a
-    // solid rim. Everything is emitted as a triangle soup in millimetres, so
-    // the STL writer and the 3D preview read the same numbers.
+    // Squircle-cornered tray with a solid base, a honeycombed wall and solid
+    // top and bottom rims. Everything is emitted as a triangle soup in
+    // millimetres, so the STL writer and the 3D preview read the same numbers.
     //
     // The wall is built by sweeping a cross-section along the outline. The
     // honeycomb lives in the unrolled (arc length, height) plane of that
@@ -399,7 +693,7 @@
 
       var D = {
         boxX: 100, boxY: 200, boxZ: 64,
-        wall: 3, floorT: 2, baseH: 8, rimH: 8, cornerR: 10,
+        wall: 3, floorT: 3, baseH: 7, rimH: 7, cornerR: 10,
         cornerN: 2.4,        // superellipse exponent of the corners
         baseChamfer: 2.5,    // 45 degree chamfer around the bottom edge
         rimChamfer: 2.5,     // 45 degree chamfer on the inner top edge
@@ -433,8 +727,8 @@
         var cell = clamp(num(o.cell, D.cell), 3, 80);
         var rib = clamp(num(o.rib, D.rib), 0.3, cell * 0.7);
 
-        // The three chamfers are proportions of the original box, held back
-        // whenever the piece they sit on is too small to carry them.
+        // The three chamfers shrink when the piece they sit on is too small
+        // to carry them.
         var floorChamfer = Math.min(D.floorChamfer, wall / 2, floorT);
         var baseChamfer = Math.min(D.baseChamfer, cornerR * 0.6, floorT + floorChamfer - 0.2);
         var rimChamfer = Math.min(D.rimChamfer, wall - 0.4, rimH - 0.6);
@@ -1042,25 +1336,7 @@
         return new Uint8Array(buf);
       }
 
-      // The OpenSCAD model this engine mirrors, with the parameter block
-      // rewritten to the numbers on screen.
-      function toScad(P) {
-        var src = document.getElementById('scad-source');
-        if (!src) return null;
-        var vals = {
-          box_x: P.boxX, box_y: P.boxY, box_z: P.boxZ,
-          corner_r: P.cornerR, wall: P.wall, floor_t: P.floorT,
-          floor_chamfer: P.floorChamfer, base_chamfer: P.baseChamfer,
-          base_h: P.baseH, rim_h: P.rimH, rim_chamfer: P.rimChamfer,
-          cell: P.cell, rib: P.rib, row_keep: P.rowKeep
-        };
-        return src.textContent.replace(/^(\w+) = [^;]+;/gm, function (line, name) {
-          if (!(name in vals)) return line;
-          return name + ' = ' + (Math.round(vals[name] * 1e6) / 1e6) + ';';
-        }).replace(/^\uFEFF/, '').trim() + '\n';
-      }
-
-      root.BoxEngine = { DEFAULTS: D, compute: compute, build: build, toStl: toStl, toScad: toScad };
+      root.BoxEngine = { DEFAULTS: D, compute: compute, build: build, toStl: toStl };
     })(typeof window !== 'undefined' ? window : this);
   </script>
 </head>
@@ -1088,189 +1364,13 @@
 
   <main id="app"></main>
 
-  <!-- The OpenSCAD model, kept in step with organizer_box.scad by
-       `make embed`. It is served to the user as the .scad download. -->
-  <script id="scad-source" type="text/plain">
-// Caixa organizadora com paredes em favo de mel.
-//
-// Reproduz a geometria de 200x100_4_V2.stl (100 x 200 x 64 mm, cantos em
-// superelipse, aro macico no topo) com a espessura da nervura do favo
-// configuravel. O original usa rib = 2; este ficheiro usa 4/3 (1/3 mais fino).
-//
-// base_h acrescenta um aro macico tambem em baixo, que o original nao tem; os
-// valores por omissao ficam fieis a peca de origem.
-
-/* [Corpo] */
-box_x = 100;         // largura
-box_y = 200;         // comprimento
-box_z = 64;          // altura
-corner_r = 10;       // raio dos cantos
-corner_n = 2.4;      // expoente da superelipse dos cantos
-wall = 3;            // espessura da parede
-floor_t = 2;         // espessura do fundo ao centro
-floor_chamfer = 1;   // chanfro a 45 graus na juncao fundo/parede
-base_chamfer = 2.5;  // chanfro a 45 graus na aresta inferior exterior
-base_h = 0;          // banda macica acima do fundo (o original nao tem)
-rim_h = 8;           // banda macica sob o bordo superior
-rim_chamfer = 2.5;   // chanfro a 45 graus no bordo interior de topo
-
-/* [Favo de mel] */
-cell = 10;           // passo da celula, medido entre faces
-rib = 4 / 3;         // material entre celulas vizinhas (original: 2)
-row_z0 = undef;      // cota de uma fiada; undef = escolhida automaticamente
-row_keep = 0.3;      // fraccao minima de um furo cortado pelo fundo ou pelo aro
-
-/* [Qualidade] */
-corner_steps = 60;   // segmentos por canto da superelipse
-$fs = 0.4;
-$fa = 2;
-
-SQRT3 = 1.7320508075688772;
-
-hole_r = (cell - rib) / SQRT3;   // circunraio do furo hexagonal
-col_pitch = cell / SQRT3 * 1.5;  // distancia horizontal entre colunas
-row_pitch = cell;                // distancia vertical dentro da mesma coluna
-
-floor_top = floor_t + floor_chamfer;  // cota do fundo junto a parede
-
-// A banda perfurada vive entre os dois aros macicos.
-band_bottom = floor_top + base_h;
-rim_bottom = box_z - rim_h;
-
-eps = 0.01;
-
-// ---------------------------------------------------------------- perfil 2D
-
-// Um quadrante de superelipse: |u|^n + |v|^n = 1.
-function se_arc(cx, cy, sx, sy, r, n, rev) =
-    [for (i = [0:corner_steps])
-        let (t = rev ? 90 - i * 90 / corner_steps : i * 90 / corner_steps)
-        [cx + sx * r * pow(cos(t), 2 / n), cy + sy * r * pow(sin(t), 2 / n)]];
-
-// Rectangulo w x l centrado na origem com cantos em superelipse de raio r.
-function squircle_rect(w, l, r, n) =
-    let (cx = w / 2 - r, cy = l / 2 - r)
-    concat(
-        se_arc( cx,  cy,  1,  1, r, n, false),
-        se_arc(-cx,  cy, -1,  1, r, n, true),
-        se_arc(-cx, -cy, -1, -1, r, n, false),
-        se_arc( cx, -cy,  1, -1, r, n, true));
-
-module outline(w, l) {
-    polygon(squircle_rect(w, l, corner_r, corner_n));
-}
-
-function path_len(p, i = 0) = i + 1 < len(p) ? norm(p[i + 1] - p[i]) + path_len(p, i + 1) : 0;
-
-corner_len = path_len(se_arc(0, 0, 1, 1, corner_r, corner_n, false));
-
-// Tronco recto entre dois perfis 2D, usado para os chanfros a 45 graus.
-module taper(z0, z1) {
-    hull() {
-        translate([0, 0, z0]) linear_extrude(eps) children(0);
-        translate([0, 0, z1 - eps]) linear_extrude(eps) children(1);
-    }
-}
-
-// ------------------------------------------------------------------- solido
-
-module shell() {
-    translate([0, 0, base_chamfer])
-        linear_extrude(box_z - base_chamfer) outline(box_x, box_y);
-    taper(0, base_chamfer) {
-        offset(r = -base_chamfer) outline(box_x, box_y);
-        outline(box_x, box_y);
-    }
-}
-
-module cavity() {
-    iw = box_x - 2 * wall;
-    il = box_y - 2 * wall;
-
-    taper(floor_t, floor_top) {
-        offset(r = -floor_chamfer) outline(iw, il);
-        outline(iw, il);
-    }
-    translate([0, 0, floor_top - eps])
-        linear_extrude(box_z - rim_chamfer - floor_top + eps) outline(iw, il);
-    taper(box_z - rim_chamfer, box_z + eps) {
-        outline(iw, il);
-        offset(r = rim_chamfer) outline(iw, il);
-    }
-}
-
-// --------------------------------------------------------------- favo de mel
-
-hole_hh = (cell - rib) / 2;              // meia altura do furo, entre faces
-slot_pitch = row_pitch / 2;              // fiadas pares e impares intercalam
-band_mid = (band_bottom + rim_bottom) / 2;
-
-function slot_m0(z0) = floor((band_bottom - hole_hh - z0) / slot_pitch);
-function slot_m1(z0) = ceil((rim_bottom + hole_hh - z0) / slot_pitch);
-
-// Quanto resta de um furo depois de cortado pelos dois aros, em fraccao da sua
-// altura. Zero quando a fiada nao chega a banda perfurada.
-function slot_kept(zc) =
-    max(0, min(zc + hole_hh, rim_bottom) - max(zc - hole_hh, band_bottom)) / (2 * hole_hh);
-
-function sum(v, i = 0) = i < len(v) ? v[i] + sum(v, i + 1) : 0;
-
-// Area aberta que uma dada fase deixa, ignorando os furos demasiado cortados.
-function phase_open(z0) =
-    sum([for (m = [slot_m0(z0):slot_m1(z0)])
-            let (k = slot_kept(z0 + m * slot_pitch)) k >= row_keep ? k : 0]);
-
-// Duas fases mantem a malha simetrica na banda: uma fiada ao centro, ou duas a
-// ladea-lo. Fica a que deixa mais furo aberto.
-function auto_z0() =
-    phase_open(band_mid + slot_pitch / 2) > phase_open(band_mid)
-        ? band_mid + slot_pitch / 2 : band_mid;
-
-z0 = is_undef(row_z0) ? auto_z0() : row_z0;
-
-// Campo de hexagonos no plano da parede: x tangencial, y = cota z real.
-// So entram celulas cujo centro cai no troco recto da parede e cujo furo nao
-// passa do meio do canto, onde comeca a parede seguinte.
-module hex_field(half_span) {
-    nj = min(floor(half_span / col_pitch),
-             floor((half_span + corner_len / 2 - hole_r) / col_pitch));
-
-    intersection() {
-        union() {
-            for (j = [-nj:nj], m = [slot_m0(z0):slot_m1(z0)])
-                if ((j - m) % 2 == 0 && slot_kept(z0 + m * slot_pitch) >= row_keep)
-                    translate([j * col_pitch, z0 + m * slot_pitch])
-                        circle(r = hole_r, $fn = 6);
-        }
-        translate([0, band_mid])
-            square([2 * half_span + 4 * hole_r, rim_bottom - band_bottom], center = true);
-    }
-}
-
-module honeycomb() {
-    // Paredes longas (normal em X).
-    rotate([90, 0, 90])
-        linear_extrude(box_x + 20, center = true) hex_field(box_y / 2 - corner_r);
-    // Paredes curtas (normal em Y).
-    rotate([90, 0, 0])
-        linear_extrude(box_y + 20, center = true) hex_field(box_x / 2 - corner_r);
-}
-
-// --------------------------------------------------------------------- peca
-
-difference() {
-    shell();
-    cavity();
-    honeycomb();
-}
-</script>
 
   <script>
   (function () {
     var h = React.createElement;
     var BE = window.BoxEngine;
 
-    window.__currentLanguage = 'pt';
+    window.__currentLanguage = 'en';
     window.__languageListeners = [];
 
     function fmt(str, args) {
@@ -1561,7 +1661,7 @@ difference() {
       var t = useLang();
       var st = React.useState({
         boxX: 100, boxY: 200, boxZ: 64,
-        wall: 3, floorT: 2, baseH: 8, rimH: 8, cornerR: 10,
+        wall: 3, floorT: 3, baseH: 7, rimH: 7, cornerR: 10,
         cell: 10, rib: 1.333
       });
       var o = st[0], setO = st[1];
@@ -1626,11 +1726,6 @@ difference() {
         if (!model) return;
         download(new Blob([BE.toStl(model.v, 'Organizer box ' + baseName())], { type: 'model/stl' }),
           baseName() + '.stl');
-      }
-      function saveScad() {
-        var src = BE.toScad(P);
-        if (!src) return;
-        download(new Blob([src], { type: 'text/plain' }), baseName() + '.scad');
       }
 
       var warnings = [];
@@ -1743,15 +1838,11 @@ difference() {
                     viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
                     strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
                   }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
-                  t('download')),
-                h('button', {
-                  type: 'button', className: 'btn secondary', disabled: !model, onClick: saveScad
-                }, t('downloadScad'))
+                  t('download'))
               )
             )
           )
-        ),
-        h('footer', null, t('footerText'))
+        )
       );
     }
 
@@ -1785,8 +1876,14 @@ difference() {
       }
 
       var languages = [
+        { code: 'en', flag: 'https://flagcdn.com/w20/gb.png', name: 'English' },
         { code: 'pt', flag: 'https://flagcdn.com/w20/pt.png', name: 'Português' },
-        { code: 'en', flag: 'https://flagcdn.com/w20/gb.png', name: 'English' }
+        { code: 'es', flag: 'https://flagcdn.com/w20/es.png', name: 'Español' },
+        { code: 'fr', flag: 'https://flagcdn.com/w20/fr.png', name: 'Français' },
+        { code: 'de', flag: 'https://flagcdn.com/w20/de.png', name: 'Deutsch' },
+        { code: 'it', flag: 'https://flagcdn.com/w20/it.png', name: 'Italiano' },
+        { code: 'zh', flag: 'https://flagcdn.com/w20/cn.png', name: '中文' },
+        { code: 'ja', flag: 'https://flagcdn.com/w20/jp.png', name: '日本語' }
       ];
       var sel = languages.filter(function (l) { return l.code === lang; })[0];
 
