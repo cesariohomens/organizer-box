@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <title>Caixa Organizadora</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#0c0e13" />
+
+  <!-- Google Fonts - Exo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- React 18 -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- three.js: last release with a plain global build, so no bundler is needed -->
+  <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+
+  <style>
+    /* -------------------------------------------------------------
+       Same tokens as the string-art studio next door: one neutral
+       scale, one accent, one elevation ramp.
+       ------------------------------------------------------------- */
+    :root {
+      --ink:#101319; --ink-2:#454b57; --muted:#727a88;
+      --bg:#f4f5f7; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#eef0f4;
+      --line:#e5e7ec; --line-strong:#d2d6de;
+      --accent:#dc2626; --accent-soft:#fef2f2;
+      --r-lg:18px; --r:12px; --r-sm:9px;
+      --sh-1:0 1px 2px rgba(16,24,40,.05);
+      --sh-2:0 1px 3px rgba(16,24,40,.07), 0 14px 30px -14px rgba(16,24,40,.22);
+      --sh-pop:0 32px 70px -18px rgba(16,24,40,.45);
+      --ring:0 0 0 3px rgba(16,19,25,.10);
+      --ring-strong:0 0 0 3px rgba(16,19,25,.24);
+      --gutter:22px;
+      --ease:cubic-bezier(.2,.7,.3,1);
+    }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+      margin:0; color:var(--ink); background:var(--bg);
+      background-image:radial-gradient(900px 380px at 50% -160px, #e9ecf1, transparent 70%);
+      font:400 14px/1.5 'Exo', system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection { background:var(--accent); color:#fff; }
+    * { scrollbar-width:thin; scrollbar-color:#c6ccd6 transparent; }
+    ::-webkit-scrollbar { width:11px; height:11px; }
+    ::-webkit-scrollbar-thumb {
+      background:#c6ccd6; border:3px solid transparent; border-radius:999px; background-clip:content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover { background:#aeb6c2; background-clip:content-box; }
+
+    /* --- App bar ------------------------------------------------- */
+    header {
+      position:relative; color:#fff;
+      background:
+        radial-gradient(680px 240px at 10% -40%, rgba(220,38,38,.22), transparent 70%),
+        linear-gradient(140deg, #191d26 0%, #0c0e13 58%, #14181f 100%);
+    }
+    header::after {
+      content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+    }
+    .appbar {
+      max-width:1400px; margin:0 auto; padding:18px var(--gutter);
+      display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    }
+    .brand { display:flex; align-items:center; gap:14px; flex:1 1 280px; min-width:0; }
+    .brand-mark {
+      width:46px; height:46px; flex-shrink:0; border-radius:14px; display:grid; place-items:center;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .brand-mark svg { width:28px; height:28px; }
+    .header-content { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    header h1 { margin:0; font-size:19px; font-weight:600; letter-spacing:.2px; }
+    header .hint { color:rgba(255,255,255,.58); font-size:12px; font-weight:300; }
+    #language-selector { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    #language-selector > div > span { font-size:12px; color:rgba(255,255,255,.55); font-weight:400; }
+
+    /* --- Dropdowns ----------------------------------------------- */
+    .custom-select-wrapper { position:relative; width:172px; }
+    .custom-select-button {
+      width:100%; border:1px solid rgba(255,255,255,.16); border-radius:var(--r); padding:9px 12px;
+      background:rgba(255,255,255,.07); color:#fff; display:flex; align-items:center;
+      justify-content:space-between; gap:8px; cursor:pointer;
+      transition:background .16s var(--ease), border-color .16s var(--ease);
+      font-family:inherit; font-weight:500; font-size:12.5px;
+    }
+    .custom-select-button:hover { background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.28); }
+    .custom-select-button:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.22); }
+    .custom-select-label { display:flex; align-items:center; gap:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .custom-select-arrow { width:15px; height:15px; opacity:.65; flex-shrink:0; }
+    .custom-select-menu, .select-menu {
+      position:absolute; z-index:2000; margin-top:6px; width:100%; max-height:280px; overflow:auto;
+      border-radius:14px; border:1px solid var(--line); background:var(--surface);
+      box-shadow:var(--sh-2); display:none; padding:6px;
+    }
+    .custom-select-menu.open, .select-menu.open { display:block; }
+    .custom-select-option, .select-option {
+      width:100%; text-align:left; padding:9px 10px; cursor:pointer; border-radius:var(--r-sm);
+      display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink);
+      border:none; background:none; font-family:inherit; font-weight:500;
+      transition:background .14s var(--ease);
+    }
+    .custom-select-option:hover, .select-option:hover { background:var(--surface-2); }
+    .custom-select-option.selected, .select-option.selected { background:var(--ink); color:#fff; }
+    .flag-icon {
+      width:22px; height:16px; object-fit:cover; display:inline-block; border-radius:3px;
+      box-shadow:0 0 0 1px rgba(0,0,0,.12);
+    }
+
+    main { padding:var(--gutter) var(--gutter) 40px; max-width:1400px; margin:0 auto; }
+
+    /* --- Surfaces ------------------------------------------------ */
+    .card {
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+      padding:20px; margin-bottom:18px; box-shadow:var(--sh-1);
+    }
+    .card h2 {
+      margin:0 0 16px; font-size:11.5px; font-weight:700; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--muted);
+      display:flex; align-items:center; gap:9px;
+    }
+    .card h2::before {
+      content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0;
+    }
+    .row { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+    .col { flex:1 1 340px; min-width:0; }
+    .col-wide { flex:1.35 1 420px; min-width:0; }
+    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0 16px; }
+
+    /* --- Fields -------------------------------------------------- */
+    .field { margin-bottom:16px; }
+    .field:last-child { margin-bottom:0; }
+    label { display:block; font-size:12.5px; margin-bottom:7px; color:var(--ink-2); font-weight:600; }
+    input[type="number"], .select-button {
+      width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:var(--r);
+      font-family:inherit; font-size:14px; font-weight:400; background:var(--surface); color:var(--ink);
+      transition:border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
+    }
+    input[type="number"] { font-variant-numeric:tabular-nums; }
+    input[type="number"]:hover, .select-button:hover { border-color:#bcc3ce; }
+    input[type="number"]:focus, .select-button:focus-visible {
+      outline:none; border-color:var(--ink); box-shadow:var(--ring);
+    }
+    .select-wrapper { position:relative; }
+    .select-button {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      cursor:pointer; text-align:left; font-weight:500;
+    }
+    .select-wrapper.open .select-button { border-color:var(--ink); box-shadow:var(--ring); }
+    .select-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .select-arrow {
+      width:16px; height:16px; flex-shrink:0; color:var(--muted);
+      transition:transform .18s var(--ease);
+    }
+    .select-wrapper.open .select-arrow { transform:rotate(180deg); }
+    .hint { font-size:12px; color:var(--muted); font-weight:400; line-height:1.5; }
+    .locked {
+      display:inline-flex; align-items:center; gap:5px; margin-left:7px; padding:1px 7px;
+      border-radius:999px; background:var(--surface-3); color:var(--ink-2);
+      font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+    }
+
+    /* --- Buttons ------------------------------------------------- */
+    .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .controls.bar { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+    .btn {
+      --btn-bg:var(--ink); --btn-fg:#fff; --btn-bd:var(--ink);
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height:40px; padding:10px 16px; border-radius:var(--r); border:1px solid var(--btn-bd);
+      background:var(--btn-bg); color:var(--btn-fg); cursor:pointer; box-shadow:var(--sh-1);
+      font-family:inherit; font-size:13.5px; font-weight:600; letter-spacing:.01em; white-space:nowrap;
+      transition:transform .12s var(--ease), box-shadow .16s var(--ease), background .16s var(--ease), border-color .16s var(--ease);
+    }
+    .btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:var(--sh-2); }
+    .btn:active:not(:disabled) { transform:translateY(0); box-shadow:var(--sh-1); }
+    .btn:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .btn.secondary { --btn-bg:var(--surface); --btn-fg:var(--ink); --btn-bd:var(--line-strong); }
+    .btn.secondary:hover:not(:disabled) { --btn-bg:var(--surface-2); --btn-bd:#bcc3ce; }
+    .btn.grow { flex:1 1 160px; }
+    .btn svg { width:17px; height:17px; flex-shrink:0; }
+    .btn:disabled {
+      --btn-bg:var(--surface-2); --btn-fg:var(--muted); --btn-bd:var(--line);
+      cursor:not-allowed; box-shadow:none;
+    }
+
+    /* --- Read-outs ----------------------------------------------- */
+    .stat {
+      display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+      padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;
+    }
+    .stat:last-child { border-bottom:none; padding-bottom:0; }
+    .stat span { color:var(--muted); }
+    .stat b { font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; text-align:right; }
+
+    .alert {
+      display:flex; align-items:flex-start; gap:10px; line-height:1.45;
+      padding:12px 14px; border-radius:var(--r); border:1px solid;
+      font-size:13px; font-weight:500; margin-bottom:14px;
+    }
+    .alert::before {
+      content:''; width:6px; height:6px; margin-top:6px; border-radius:50%;
+      background:currentColor; flex-shrink:0; opacity:.85;
+    }
+    .alert.warn { background:#fffaeb; border-color:#fedf89; color:#93370d; }
+    .alert.err { background:#fef3f2; border-color:#fecdca; color:#b42318; }
+
+    /* --- 3D stage ------------------------------------------------ */
+    .stageBox { position:relative; aspect-ratio:16/11; }
+    .stage3d {
+      position:absolute; inset:0; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+      background:var(--surface-3); touch-action:none; cursor:grab;
+    }
+    .stage3d.max {
+      position:fixed; inset:14px; z-index:3000; border-radius:var(--r-lg); box-shadow:var(--sh-pop);
+    }
+    .stage3d:active { cursor:grabbing; }
+    .stage3d canvas { width:100%; height:100%; display:block; }
+    .stageBackdrop {
+      position:fixed; inset:0; z-index:2900;
+      background:rgba(11,13,18,.58); backdrop-filter:blur(3px);
+    }
+    .expand {
+      position:absolute; top:12px; right:12px; width:36px; height:36px; padding:0; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+      border:1px solid rgba(16,24,40,.1); background:rgba(255,255,255,.86); color:var(--ink);
+      box-shadow:var(--sh-1); backdrop-filter:blur(8px);
+      transition:background .15s var(--ease), transform .15s var(--ease);
+    }
+    .expand:hover { background:#fff; transform:translateY(-1px); }
+    .expand:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .expand svg { width:18px; height:18px; }
+
+    .swatch { display:flex; align-items:center; gap:10px; margin-top:12px; }
+    .swatch input[type="color"] {
+      width:46px; height:36px; padding:3px; border:1px solid var(--line-strong); border-radius:var(--r-sm);
+      background:var(--surface); cursor:pointer; flex-shrink:0;
+    }
+    .swatch input[type="color"]:focus-visible { outline:none; box-shadow:var(--ring); }
+
+    footer {
+      max-width:1400px; margin:0 auto; padding:24px var(--gutter) 40px;
+      text-align:center; color:var(--muted); font-size:12px;
+    }
+    footer a { color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-strong); }
+
+    @media (max-width:640px) {
+      :root { --gutter:14px; }
+      .card { padding:16px; border-radius:16px; }
+      .appbar { padding:14px var(--gutter); }
+      .brand-mark { width:40px; height:40px; border-radius:12px; }
+      .brand-mark svg { width:24px; height:24px; }
+      header h1 { font-size:17px; }
+      .custom-select-wrapper { width:158px; }
+      .row { gap:14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition:none !important; animation:none !important; }
+    }
+  </style>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Internationalization
+    // ---------------------------------------------------------------
+    window.I18N = {};
+
+    window.I18N.pt = {
+      title: 'Caixa Organizadora',
+      headerHint: 'Caixas em favo de mel para impressão 3D, à medida',
+      language: 'Idioma',
+
+      sizeCard: 'Medidas exteriores',
+      preset: 'Modelo',
+      presetCustom: 'Personalizado',
+      width: 'Largura X (mm)',
+      length: 'Comprimento Y (mm)',
+      height: 'Altura Z (mm)',
+
+      shellCard: 'Estrutura',
+      wall: 'Parede (mm)',
+      floor: 'Fundo (mm)',
+      base: 'Aro inferior (mm)',
+      rim: 'Aro superior (mm)',
+      corner: 'Raio dos cantos (mm)',
+      shellHint: 'Os aros são as faixas maciças em cima e em baixo: a de cima dá rigidez à boca, a de baixo fecha a parede junto ao fundo. Com o aro inferior a 0 o favo começa logo acima do fundo, como na caixa original. O raio dos cantos nunca desce abaixo da espessura da parede.',
+
+      gridCard: 'Grelha',
+      cell: 'Célula (mm entre faces)',
+      rib: 'Nervura (mm)',
+      keepsScale: 'fixo',
+      gridHint: 'Célula e nervura não mudam com o tamanho da caixa: uma caixa maior leva mais favos, do mesmo tamanho.',
+      gridHole: 'Furo hexagonal: {0} mm entre faces, {1} mm entre vértices.',
+
+      previewCard: 'Pré-visualização',
+      colour: 'Cor',
+      maximize: 'Aumentar',
+      minimize: 'Reduzir',
+      error3D: 'O teu navegador não conseguiu abrir uma vista 3D (WebGL).',
+      dragHint: 'Arrasta para rodar, roda do rato para aproximar, Shift+arrasta para deslocar.',
+
+      summaryCard: 'Resumo',
+      inner: 'Interior',
+      capacity: 'Capacidade',
+      cells: 'Furos',
+      material: 'Material',
+      weight: 'Peso estimado',
+      triangles: 'Triângulos',
+      rowsCols: 'Fiadas × colunas',
+
+      download: 'Descarregar STL',
+      downloadScad: 'Guardar .scad',
+
+      warnRib: 'Uma nervura de {0} mm é fina para um bico de 0,4 mm. Acima de 1,2 mm imprime com paredes cheias.',
+      warnBed: 'Com {0} × {1} mm a caixa não cabe em muitas mesas de impressão.',
+      warnBand: 'A parede perfurada tem só {0} mm: não cabe nem uma fiada completa de favos.',
+      errSize: 'Estas medidas não dão uma caixa válida. Reduz a parede ou o raio dos cantos.',
+
+      footerText: 'Medidas em milímetros. STL binário, pronto para o fatiador.'
+    };
+
+    window.I18N.en = {
+      title: 'Organizer Box',
+      headerHint: 'Made-to-measure honeycomb boxes for 3D printing',
+      language: 'Language',
+
+      sizeCard: 'Outer size',
+      preset: 'Preset',
+      presetCustom: 'Custom',
+      width: 'Width X (mm)',
+      length: 'Length Y (mm)',
+      height: 'Height Z (mm)',
+
+      shellCard: 'Shell',
+      wall: 'Wall (mm)',
+      floor: 'Floor (mm)',
+      base: 'Bottom rim (mm)',
+      rim: 'Top rim (mm)',
+      corner: 'Corner radius (mm)',
+      shellHint: 'The rims are the solid bands at the top and bottom: the top one stiffens the mouth, the bottom one closes the wall off where it meets the floor. Set the bottom rim to 0 and the comb starts right above the floor, as on the original box. The corner radius never drops below the wall thickness.',
+
+      gridCard: 'Honeycomb',
+      cell: 'Cell (mm across flats)',
+      rib: 'Rib (mm)',
+      keepsScale: 'fixed',
+      gridHint: 'Cell and rib do not scale with the box: a bigger box gets more cells, not bigger ones.',
+      gridHole: 'Hexagonal opening: {0} mm across flats, {1} mm across corners.',
+
+      previewCard: 'Preview',
+      colour: 'Colour',
+      maximize: 'Maximize',
+      minimize: 'Minimize',
+      error3D: 'Your browser could not open a 3D view (WebGL).',
+      dragHint: 'Drag to orbit, wheel to zoom, Shift+drag to pan.',
+
+      summaryCard: 'Summary',
+      inner: 'Inside',
+      capacity: 'Capacity',
+      cells: 'Openings',
+      material: 'Material',
+      weight: 'Estimated weight',
+      triangles: 'Triangles',
+      rowsCols: 'Rows × columns',
+
+      download: 'Download STL',
+      downloadScad: 'Save .scad',
+
+      warnRib: 'A {0} mm rib is thin for a 0.4 mm nozzle. Above 1.2 mm it prints as solid walls.',
+      warnBed: 'At {0} × {1} mm the box will not fit many print beds.',
+      warnBand: 'The perforated wall is only {0} mm tall: not even one full row of cells fits.',
+      errSize: 'These numbers do not make a valid box. Reduce the wall or the corner radius.',
+
+      footerText: 'Millimetres throughout. Binary STL, ready for the slicer.'
+    };
+  </script>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Box engine
+    //
+    // The same solid the OpenSCAD model in this repository describes: a
+    // squircle-cornered tray with a solid base, a honeycombed wall and a
+    // solid rim. Everything is emitted as a triangle soup in millimetres, so
+    // the STL writer and the 3D preview read the same numbers.
+    //
+    // The wall is built by sweeping a cross-section along the outline. The
+    // honeycomb lives in the unrolled (arc length, height) plane of that
+    // sweep, which is what lets the openings stay the same size while the
+    // box around them grows.
+    // ---------------------------------------------------------------
+    (function (root) {
+      var SQRT3 = Math.sqrt(3);
+
+      var D = {
+        boxX: 100, boxY: 200, boxZ: 64,
+        wall: 3, floorT: 2, baseH: 8, rimH: 8, cornerR: 10,
+        cornerN: 2.4,        // superellipse exponent of the corners
+        baseChamfer: 2.5,    // 45 degree chamfer around the bottom edge
+        rimChamfer: 2.5,     // 45 degree chamfer on the inner top edge
+        floorChamfer: 1,     // 45 degree chamfer where the floor meets the wall
+        cell: 10, rib: 4 / 3,
+        rowKeep: 0.3,        // smallest surviving fraction of a clipped opening
+        cornerSteps: 20,     // samples per corner arc
+        blendSteps: 5        // extra samples at each end of a straight run
+      };
+
+      function num(v, d) { var x = parseFloat(v); return isFinite(x) ? x : d; }
+      function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+      function cross2(ax, ay, bx, by) { return ax * by - ay * bx; }
+
+      // ------------------------------------------------------------ params
+
+      function compute(o) {
+        var boxX = clamp(num(o.boxX, D.boxX), 24, 500);
+        var boxY = clamp(num(o.boxY, D.boxY), 24, 500);
+        var boxZ = clamp(num(o.boxZ, D.boxZ), 10, 400);
+        var short = Math.min(boxX, boxY);
+
+        var wall = clamp(num(o.wall, D.wall), 1, short / 5);
+        var floorT = clamp(num(o.floorT, D.floorT), 0.8, boxZ / 3);
+        var rimH = clamp(num(o.rimH, D.rimH), 1.5, boxZ / 2);
+        // Below one wall thickness the cavity would run past the end of the
+        // straight outer face and the two outlines could no longer be paired
+        // up, so that is the floor for the corner radius.
+        var cornerR = clamp(num(o.cornerR, D.cornerR), wall, short / 2 - wall - 0.5);
+
+        var cell = clamp(num(o.cell, D.cell), 3, 80);
+        var rib = clamp(num(o.rib, D.rib), 0.3, cell * 0.7);
+
+        // The three chamfers are proportions of the original box, held back
+        // whenever the piece they sit on is too small to carry them.
+        var floorChamfer = Math.min(D.floorChamfer, wall / 2, floorT);
+        var baseChamfer = Math.min(D.baseChamfer, cornerR * 0.6, floorT + floorChamfer - 0.2);
+        var rimChamfer = Math.min(D.rimChamfer, wall - 0.4, rimH - 0.6);
+
+        var floorTop = floorT + floorChamfer;
+        var rimBottom = boxZ - rimH;
+        // The perforated band lives between the two solid rims, and needs at
+        // least a sliver of height left for it.
+        var baseH = clamp(num(o.baseH, D.baseH), 0, Math.max(0, rimBottom - floorTop - 1));
+        var bandBottom = floorTop + baseH;
+
+        var holeAF = cell - rib;
+
+        var P = {
+          boxX: boxX, boxY: boxY, boxZ: boxZ,
+          wall: wall, floorT: floorT, baseH: baseH, rimH: rimH,
+          cornerR: cornerR, cornerN: D.cornerN,
+          baseChamfer: baseChamfer, rimChamfer: rimChamfer, floorChamfer: floorChamfer,
+          cell: cell, rib: rib, rowKeep: D.rowKeep,
+          cornerSteps: D.cornerSteps, blendSteps: D.blendSteps,
+          floorTop: floorTop, bandBottom: bandBottom, rimBottom: rimBottom,
+          band: rimBottom - bandBottom,
+          holeAF: holeAF,
+          holeR: holeAF / SQRT3,      // circumradius of an opening
+          holeHH: holeAF / 2,         // half its height
+          colPitch: cell * SQRT3 / 2,
+          slotPitch: cell / 2,
+          valid: true
+        };
+
+        if (P.band <= 0.5 || cornerR <= 0.5 || short - 2 * wall <= 2 * cornerR) P.valid = false;
+        return P;
+      }
+
+      // ----------------------------------------------------------- outline
+
+      // One quadrant of |u|^n + |v|^n = 1, walked from the x axis to the y one.
+      // The natural parameter races through the ends of the quadrant, so the
+      // curve is measured first and then walked at a constant speed: an evenly
+      // spaced corner keeps the chord error down where it is tightest.
+      function arcPts(cx, cy, sx, sy, r, n, steps, reverse) {
+        var fine = Math.max(96, steps * 6), raw = [], acc = [0], i, t;
+        for (i = 0; i <= fine; i++) {
+          t = i * (Math.PI / 2) / fine;
+          raw.push([r * Math.pow(Math.cos(t), 2 / n), r * Math.pow(Math.sin(t), 2 / n)]);
+          if (i) acc.push(acc[i - 1] + Math.hypot(raw[i][0] - raw[i - 1][0], raw[i][1] - raw[i - 1][1]));
+        }
+
+        var total = acc[fine], out = [], j = 0, k, target, f;
+        for (k = 0; k <= steps; k++) {
+          target = total * k / steps;
+          while (j < fine - 1 && acc[j + 1] < target) j++;
+          f = (target - acc[j]) / (acc[j + 1] - acc[j] || 1);
+          out.push([cx + sx * (raw[j][0] + (raw[j + 1][0] - raw[j][0]) * f),
+                    cy + sy * (raw[j][1] + (raw[j + 1][1] - raw[j][1]) * f)]);
+        }
+        return reverse ? out.reverse() : out;
+      }
+
+      // Distances at which a straight run is sampled. The middle is one long
+      // span, because both the outer face and the inner face are flat there;
+      // the ends are refined, because that is where the inner face is still
+      // coming out of its corner.
+      function runOffsets(len, blend, steps) {
+        var b = Math.min(blend, len / 2), out = [], i, v;
+        for (i = 0; i <= steps; i++) out.push(b * i / steps);
+        for (i = steps; i >= 0; i--) {
+          v = len - b * i / steps;
+          if (v - out[out.length - 1] > 1e-6) out.push(v);
+        }
+        return out;
+      }
+
+      // The outer outline, as a closed loop of points plus the index range of
+      // each of the four straight runs. The loop starts in the middle of a
+      // corner, so no opening ever straddles the seam at s = 0.
+      function outerLoop(P) {
+        var hx = P.boxX / 2, hy = P.boxY / 2, r = P.cornerR, n = P.cornerN;
+        var ax = hx - r, ay = hy - r, st = P.cornerSteps;
+        var pts = [], runs = [];
+
+        function run(from, to) {
+          var dx = to[0] - from[0], dy = to[1] - from[1];
+          var len = Math.sqrt(dx * dx + dy * dy);
+          var offs = runOffsets(len, P.wall, P.blendSteps), i, f;
+          var i0 = pts.length;
+          for (i = 0; i < offs.length; i++) {
+            f = offs[i] / len;
+            pts.push([from[0] + dx * f, from[1] + dy * f]);
+          }
+          runs.push({ i0: i0, i1: pts.length - 1 });
+        }
+        // Corner endpoints are already on the runs either side of it.
+        function corner(cx, cy, sx, sy, reverse) {
+          var a = arcPts(cx, cy, sx, sy, r, n, st, reverse), i;
+          for (i = 1; i < a.length - 1; i++) pts.push(a[i]);
+        }
+
+        run([hx, -ay], [hx, ay]);        corner(ax, ay, 1, 1, false);
+        run([ax, hy], [-ax, hy]);        corner(-ax, ay, -1, 1, true);
+        run([-hx, ay], [-hx, -ay]);      corner(-ax, -ay, -1, -1, false);
+        run([-ax, -hy], [ax, -hy]);      corner(ax, -ay, 1, -1, true);
+
+        // Rotate the seam into the middle of that last corner.
+        var N = pts.length, k = N - Math.ceil((st - 1) / 2), i;
+        var rot = [];
+        for (i = 0; i < N; i++) rot.push(pts[(i + k) % N]);
+        for (i = 0; i < runs.length; i++) {
+          runs[i] = { i0: (runs[i].i0 - k + N) % N, i1: (runs[i].i1 - k + N) % N };
+        }
+        return { pts: rot, runs: runs };
+      }
+
+      // Inward unit normals of a closed counter-clockwise loop, averaged from
+      // the two edges meeting at each point.
+      function normals(pts) {
+        var N = pts.length, out = [], i, j, k, ax, ay, bx, by, la, lb, x, y, l;
+        for (i = 0; i < N; i++) {
+          j = (i + 1) % N; k = (i + N - 1) % N;
+          ax = pts[i][0] - pts[k][0]; ay = pts[i][1] - pts[k][1];
+          bx = pts[j][0] - pts[i][0]; by = pts[j][1] - pts[i][1];
+          la = Math.sqrt(ax * ax + ay * ay) || 1;
+          lb = Math.sqrt(bx * bx + by * by) || 1;
+          x = -ay / la - by / lb;      // left of travel, i.e. inwards for CCW
+          y = ax / la + bx / lb;
+          l = Math.sqrt(x * x + y * y) || 1;
+          out.push([x / l, y / l]);
+        }
+        return out;
+      }
+
+      function offsetLoop(pts, nrm, d) {
+        var out = [], i;
+        for (i = 0; i < pts.length; i++) out.push([pts[i][0] + nrm[i][0] * d, pts[i][1] + nrm[i][1] * d]);
+        return out;
+      }
+
+      // A dense, exact copy of the cavity outline, used only as a target for
+      // the rays that pair inner points with outer ones.
+      function cavityPolyline(P) {
+        var hx = P.boxX / 2 - P.wall, hy = P.boxY / 2 - P.wall;
+        var r = P.cornerR, n = P.cornerN, ax = hx - r, ay = hy - r, st = 4 * P.cornerSteps;
+        var pts = [];
+        function corner(cx, cy, sx, sy, reverse) {
+          var a = arcPts(cx, cy, sx, sy, r, n, st, reverse), i;
+          for (i = 0; i < a.length - 1; i++) pts.push(a[i]);
+        }
+        pts.push([hx, -ay]);   corner(ax, ay, 1, 1, false);
+        pts.push([ax, hy]);    corner(-ax, ay, -1, 1, true);
+        pts.push([-hx, ay]);   corner(-ax, -ay, -1, -1, false);
+        pts.push([-ax, -hy]);  corner(ax, -ay, 1, -1, true);
+        return pts;
+      }
+
+      // Where the inward normal at each outer point meets the cavity. Pairing
+      // the two loops this way keeps the wall perpendicular to the outside
+      // face, which is the direction the openings are then cut along.
+      function pairInner(outer, nrm, poly, fallback) {
+        var M = poly.length, out = [], depth = [], i, j, best, t, u, den;
+        for (i = 0; i < outer.length; i++) {
+          var px = outer[i][0], py = outer[i][1], mx = nrm[i][0], my = nrm[i][1];
+          best = Infinity;
+          for (j = 0; j < M; j++) {
+            var a = poly[j], b = poly[(j + 1) % M];
+            var ex = b[0] - a[0], ey = b[1] - a[1];
+            den = cross2(mx, my, ex, ey);
+            if (Math.abs(den) < 1e-12) continue;
+            var wx = px - a[0], wy = py - a[1];
+            t = -cross2(wx, wy, ex, ey) / den;
+            u = cross2(wx, wy, mx, my) / cross2(ex, ey, mx, my);
+            if (t > 1e-7 && u >= -1e-9 && u <= 1 + 1e-9 && t < best) best = t;
+          }
+          if (!isFinite(best)) best = fallback;   // degenerate input; keep it finite
+          depth.push(best);
+          out.push([px + mx * best, py + my * best]);
+        }
+        return { pts: out, depth: depth };
+      }
+
+      // -------------------------------------------------------- honeycomb
+
+      // Rows are half a pitch apart and alternate between even and odd
+      // columns. Two phases keep the pattern symmetric inside the perforated
+      // band -- one row on the centre line, or two straddling it -- and the
+      // one that leaves more opening wins.
+      function rowSlots(P) {
+        var hh = P.holeHH, lo = P.bandBottom, hi = P.rimBottom, sp = P.slotPitch;
+
+        function kept(zc) {
+          return Math.max(0, Math.min(zc + hh, hi) - Math.max(zc - hh, lo)) / (2 * hh);
+        }
+        function range(z0) {
+          return [Math.floor((lo - hh - z0) / sp), Math.ceil((hi + hh - z0) / sp)];
+        }
+        function open(z0) {
+          var r = range(z0), sum = 0, m, k;
+          for (m = r[0]; m <= r[1]; m++) { k = kept(z0 + m * sp); if (k >= P.rowKeep) sum += k; }
+          return sum;
+        }
+
+        var mid = (lo + hi) / 2;
+        var z0 = open(mid + sp / 2) > open(mid) ? mid + sp / 2 : mid;
+        var r = range(z0), out = [], m;
+        for (m = r[0]; m <= r[1]; m++) {
+          if (kept(z0 + m * sp) >= P.rowKeep) out.push({ m: m, z: z0 + m * sp });
+        }
+        return out;
+      }
+
+      // --------------------------------------------------------- triangles
+
+      function soup() {
+        var v = new Float32Array(1 << 16), n = 0;
+        function room(k) {
+          if (n + k <= v.length) return;
+          var size = v.length;
+          while (size < n + k) size *= 2;
+          var bigger = new Float32Array(size);
+          bigger.set(v.subarray(0, n));
+          v = bigger;
+        }
+        function tri(a, b, c) {
+          room(9);
+          v[n] = a[0]; v[n + 1] = a[1]; v[n + 2] = a[2];
+          v[n + 3] = b[0]; v[n + 4] = b[1]; v[n + 5] = b[2];
+          v[n + 6] = c[0]; v[n + 7] = c[1]; v[n + 8] = c[2];
+          n += 9;
+        }
+        function quad(a, b, c, d) { tri(a, b, c); tri(a, c, d); }
+        return { tri: tri, quad: quad, done: function () { return v.slice(0, n); } };
+      }
+
+      // Drop points a clip has left sitting on top of one another, which would
+      // otherwise come back out as zero-area triangles.
+      function tidy(poly) {
+        var out = [], i, n = poly.length, a, b;
+        for (i = 0; i < n; i++) {
+          a = poly[i]; b = poly[(i + 1) % n];
+          if (Math.abs(a[0] - b[0]) > 1e-9 || Math.abs(a[1] - b[1]) > 1e-9) out.push(a);
+        }
+        return out;
+      }
+
+      // Clip a convex polygon in the (s, z) plane against a vertical line.
+      function clipS(poly, c, keepRight) {
+        var out = [], i, n = poly.length, a, b, ka, kb, f;
+        for (i = 0; i < n; i++) {
+          a = poly[i]; b = poly[(i + 1) % n];
+          ka = keepRight ? a[0] >= c - 1e-9 : a[0] <= c + 1e-9;
+          kb = keepRight ? b[0] >= c - 1e-9 : b[0] <= c + 1e-9;
+          if (ka) out.push(a);
+          if (ka !== kb && Math.abs(b[0] - a[0]) > 1e-12) {
+            f = (c - a[0]) / (b[0] - a[0]);
+            out.push([c, a[1] + (b[1] - a[1]) * f]);
+          }
+        }
+        return tidy(out);
+      }
+
+      function clipZ(poly, c, keepAbove) {
+        var out = [], i, n = poly.length, a, b, ka, kb, f;
+        for (i = 0; i < n; i++) {
+          a = poly[i]; b = poly[(i + 1) % n];
+          ka = keepAbove ? a[1] >= c - 1e-9 : a[1] <= c + 1e-9;
+          kb = keepAbove ? b[1] >= c - 1e-9 : b[1] <= c + 1e-9;
+          if (ka) out.push(a);
+          if (ka !== kb && Math.abs(b[1] - a[1]) > 1e-12) {
+            f = (c - a[1]) / (b[1] - a[1]);
+            out.push([a[0] + (b[0] - a[0]) * f, c]);
+          }
+        }
+        return tidy(out);
+      }
+
+      // ------------------------------------------------------------- build
+
+      // Arc length along a closed loop, with the perimeter in the last slot.
+      function arcTable(pts) {
+        var n = pts.length, S = new Float64Array(n + 1), i, j;
+        for (i = 0; i < n; i++) {
+          j = (i + 1) % n;
+          S[i + 1] = S[i] + Math.hypot(pts[j][0] - pts[i][0], pts[j][1] - pts[i][1]);
+        }
+        return S;
+      }
+
+      function build(P) {
+        var s = soup();
+        var loop = outerLoop(P);
+        var outer = loop.pts, N = outer.length;
+        var nrm = normals(outer);
+        var inner = pairInner(outer, nrm, cavityPolyline(P), P.wall).pts;
+        var innerNrm;
+
+        // Arc length along the outer face is the tangential coordinate the
+        // honeycomb is laid out in.
+        var S = arcTable(outer), total = S[N], i, j;
+
+        function segAt(sv) {
+          var lo = 0, hi = N - 1, mid;
+          if (sv <= 0) return 0;
+          if (sv >= total) return N - 1;
+          while (lo < hi) {
+            mid = (lo + hi + 1) >> 1;
+            if (S[mid] <= sv) lo = mid; else hi = mid - 1;
+          }
+          return lo;
+        }
+        // A point on the wall: `side` 1 rides the outer face, 0 the inner one.
+        function at(sv, z, side) {
+          var k = segAt(sv), f = (sv - S[k]) / (S[k + 1] - S[k] || 1);
+          var A = side ? outer[k] : inner[k];
+          var B = side ? outer[(k + 1) % N] : inner[(k + 1) % N];
+          return [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, z];
+        }
+
+        // --- openings ------------------------------------------------
+        var rows = rowSlots(P), holes = [], nCols = 0, r, k, m;
+        // Whatever is left of the perimeter once the four straight runs are
+        // taken off is the four corners.
+        var straight = 0;
+        for (r = 0; r < loop.runs.length; r++) straight += S[loop.runs[r].i1] - S[loop.runs[r].i0];
+        var cornerLen = Math.max(0, total - straight) / 4;
+
+        for (r = 0; r < loop.runs.length; r++) {
+          var s0 = S[loop.runs[r].i0], s1 = S[loop.runs[r].i1];
+          var half = (s1 - s0) / 2, mid = (s0 + s1) / 2;
+          // A column belongs to the wall its centre falls on, and its opening
+          // may lean into the corner but never past the middle of it, or two
+          // walls would be cutting into the same piece of material.
+          var nj = Math.min(Math.floor(half / P.colPitch),
+                            Math.floor((half + cornerLen / 2 - P.holeR) / P.colPitch));
+          nCols = Math.max(nCols, 2 * nj + 1);
+          for (j = -nj; j <= nj; j++) {
+            for (k = 0; k < rows.length; k++) {
+              m = rows[k].m;
+              if ((((j - m) % 2) + 2) % 2 !== 0) continue;
+              holes.push({ s: mid + j * P.colPitch, z: rows[k].z });
+            }
+          }
+        }
+        holes.sort(function (a, b) { return a.s - b.s; });
+
+        var R = P.holeR, hh = P.holeHH, lo = P.bandBottom, hi = P.rimBottom;
+        function halfWidth(hz, z) { return R * (1 - 0.5 * Math.abs(z - hz) / hh); }
+
+        // --- extra outline samples -----------------------------------
+        // An opening's flat top and bottom, and any edge the floor or the rim
+        // slices it along, end at an arc length the outline knows nothing
+        // about. Adding those arc lengths as samples means the solid wall
+        // beyond them is cut at the same places, so the two sides of the join
+        // share an edge rather than leaving one hanging over the other.
+        var splits = [], w;
+        for (k = 0; k < holes.length; k++) {
+          splits.push(holes[k].s - R / 2, holes[k].s + R / 2);
+          if (holes[k].z - hh < lo) {
+            w = halfWidth(holes[k].z, lo);
+            splits.push(holes[k].s - w, holes[k].s + w);
+          }
+          if (holes[k].z + hh > hi) {
+            w = halfWidth(holes[k].z, hi);
+            splits.push(holes[k].s - w, holes[k].s + w);
+          }
+        }
+        if (splits.length) {
+          // Marks outrank plain outline samples when the two land on top of
+          // one another: a face edge stops at the mark, so that is where the
+          // vertex has to be. Samples closer together than this would only
+          // make slivers anyway.
+          var MERGE = 0.005, marks = [[0, 2]];
+          for (i = 1; i < N; i++) marks.push([S[i], 0]);
+          for (i = 0; i < splits.length; i++) {
+            if (splits[i] > MERGE && splits[i] < total - MERGE) marks.push([splits[i], 1]);
+          }
+          marks.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+
+          var kept = [];
+          for (i = 0; i < marks.length; i++) {
+            var last = kept.length - 1;
+            if (last >= 0 && marks[i][0] - kept[last][0] <= MERGE) {
+              if (marks[i][1] > kept[last][1]) kept[last] = marks[i];
+            } else kept.push(marks[i]);
+          }
+
+          var no = [], ni = [], ns = [], f, kk;
+          for (i = 0; i < kept.length; i++) {
+            kk = segAt(kept[i][0]);
+            f = (kept[i][0] - S[kk]) / (S[kk + 1] - S[kk] || 1);
+            no.push([outer[kk][0] + (outer[(kk + 1) % N][0] - outer[kk][0]) * f,
+                     outer[kk][1] + (outer[(kk + 1) % N][1] - outer[kk][1]) * f]);
+            ni.push([inner[kk][0] + (inner[(kk + 1) % N][0] - inner[kk][0]) * f,
+                     inner[kk][1] + (inner[(kk + 1) % N][1] - inner[kk][1]) * f]);
+            ns.push(kept[i][0]);
+          }
+          // New points sit on the chords they split, so the arc lengths carry
+          // over unchanged.
+          outer = no; inner = ni; N = ns.length;
+          S = new Float64Array(N + 1);
+          for (i = 0; i < N; i++) S[i] = ns[i];
+          S[N] = total;
+        }
+        nrm = normals(outer);
+        innerNrm = normals(inner);
+
+        // --- wall faces ----------------------------------------------
+        var evts = [lo, hi];
+        for (k = 0; k < rows.length; k++) {
+          evts.push(clamp(rows[k].z - hh, lo, hi), clamp(rows[k].z, lo, hi), clamp(rows[k].z + hh, lo, hi));
+        }
+        evts.sort(function (a, b) { return a - b; });
+        var zs = [evts[0]];
+        for (i = 1; i < evts.length; i++) if (evts[i] - zs[zs.length - 1] > 1e-7) zs.push(evts[i]);
+
+        // Emit one convex piece of wall face, split at the outline samples so
+        // every triangle stays inside a single straight segment of the sweep.
+        function face(poly) {
+          if (poly.length < 3) return;
+          var smin = Infinity, smax = -Infinity, p;
+          for (p = 0; p < poly.length; p++) {
+            if (poly[p][0] < smin) smin = poly[p][0];
+            if (poly[p][0] > smax) smax = poly[p][0];
+          }
+          var k0 = segAt(smin), k1 = segAt(smax), kk;
+          if (k0 === k1) { emitFace(poly); return; }
+          for (kk = k0; kk <= k1; kk++) {
+            var piece = clipS(clipS(poly, S[kk], true), S[kk + 1], false);
+            if (piece.length >= 3) emitFace(piece);
+          }
+        }
+        function emitFace(poly) {
+          var p;
+          for (p = 1; p + 1 < poly.length; p++) {
+            s.tri(at(poly[0][0], poly[0][1], 1), at(poly[p][0], poly[p][1], 1), at(poly[p + 1][0], poly[p + 1][1], 1));
+            s.tri(at(poly[0][0], poly[0][1], 0), at(poly[p + 1][0], poly[p + 1][1], 0), at(poly[p][0], poly[p][1], 0));
+          }
+        }
+
+        for (i = 0; i + 1 < zs.length; i++) {
+          var za = zs[i], zb = zs[i + 1], zm = (za + zb) / 2;
+          if (zb - za < 1e-7) continue;
+
+          // Openings crossed by this strip, left to right.
+          var cut = [];
+          for (k = 0; k < holes.length; k++) {
+            var hz = holes[k].z;
+            if (zm <= Math.max(hz - hh, lo) || zm >= Math.min(hz + hh, hi)) continue;
+            cut.push([holes[k].s - halfWidth(hz, za), holes[k].s + halfWidth(hz, za),
+                      holes[k].s - halfWidth(hz, zb), holes[k].s + halfWidth(hz, zb)]);
+          }
+
+          var la = 0, lb = 0;
+          for (k = 0; k <= cut.length; k++) {
+            var ra = k < cut.length ? cut[k][0] : total;
+            var rb = k < cut.length ? cut[k][2] : total;
+            if (ra - la > 1e-7 || rb - lb > 1e-7) {
+              face([[la, za], [ra, za], [rb, zb], [lb, zb]]);
+            }
+            if (k < cut.length) { la = cut[k][1]; lb = cut[k][3]; }
+          }
+        }
+
+        // --- opening side walls --------------------------------------
+        for (k = 0; k < holes.length; k++) {
+          var sc = holes[k].s, zc = holes[k].z;
+          var hex = [[sc + R, zc], [sc + R / 2, zc + hh], [sc - R / 2, zc + hh],
+                     [sc - R, zc], [sc - R / 2, zc - hh], [sc + R / 2, zc - hh]];
+          hex = clipZ(clipZ(hex, lo, true), hi, false);
+          for (i = 0; i < hex.length; i++) {
+            var a = hex[i], b = hex[(i + 1) % hex.length];
+            // Split the edge wherever it crosses into the next segment of the
+            // sweep, so the wall of the opening follows the outline too, and
+            // wherever a strip boundary crosses it, so it is cut into the same
+            // pieces as the wall face it borders.
+            var ka = segAt(Math.min(a[0], b[0])), kb = segAt(Math.max(a[0], b[0])), cuts = [0], t;
+            if (Math.abs(b[0] - a[0]) > 1e-12) {
+              for (m = ka + 1; m <= kb; m++) {
+                t = (S[m] - a[0]) / (b[0] - a[0]);
+                if (t > 1e-9 && t < 1 - 1e-9) cuts.push(t);
+              }
+            }
+            if (Math.abs(b[1] - a[1]) > 1e-12) {
+              for (m = 0; m < zs.length; m++) {
+                t = (zs[m] - a[1]) / (b[1] - a[1]);
+                if (t > 1e-9 && t < 1 - 1e-9) cuts.push(t);
+              }
+            }
+            cuts.push(1);
+            cuts.sort(function (x, y) { return x - y; });
+            // A hole clipped by a rim puts its cut edge at the same arc length
+            // as the strip boundary that clipped it, so the two cuts can land
+            // on the same spot and leave a zero-width quad behind.
+            var uniq = [cuts[0]];
+            for (m = 1; m < cuts.length; m++) {
+              if (cuts[m] - uniq[uniq.length - 1] > 1e-10) uniq.push(cuts[m]);
+            }
+            cuts = uniq;
+            for (m = 0; m + 1 < cuts.length; m++) {
+              var t0 = cuts[m], t1 = cuts[m + 1];
+              var p0 = [a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0];
+              var p1 = [a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1];
+              s.quad(at(p0[0], p0[1], 1), at(p1[0], p1[1], 1), at(p1[0], p1[1], 0), at(p0[0], p0[1], 0));
+            }
+          }
+        }
+
+        // --- bands and caps ------------------------------------------
+        function band(loA, zA2, loB, zB2) {
+          var i2, j2;
+          for (i2 = 0; i2 < N; i2++) {
+            j2 = (i2 + 1) % N;
+            s.quad([loA[i2][0], loA[i2][1], zA2], [loA[j2][0], loA[j2][1], zA2],
+                   [loB[j2][0], loB[j2][1], zB2], [loB[i2][0], loB[i2][1], zB2]);
+          }
+        }
+        // A flat lid over a closed loop, fanned from its centroid.
+        function cap(lp, z, up) {
+          var cx = 0, cy = 0, i2, j2;
+          for (i2 = 0; i2 < N; i2++) { cx += lp[i2][0]; cy += lp[i2][1]; }
+          cx /= N; cy /= N;
+          for (i2 = 0; i2 < N; i2++) {
+            j2 = (i2 + 1) % N;
+            if (up) s.tri([cx, cy, z], [lp[i2][0], lp[i2][1], z], [lp[j2][0], lp[j2][1], z]);
+            else s.tri([cx, cy, z], [lp[j2][0], lp[j2][1], z], [lp[i2][0], lp[i2][1], z]);
+          }
+        }
+
+        var footprint = offsetLoop(outer, nrm, P.baseChamfer);
+        var floorPad = offsetLoop(inner, innerNrm, P.floorChamfer);
+        var rimFlat = offsetLoop(inner, innerNrm, -P.rimChamfer);
+
+        // Base, wall and rim are one surface, not three solids piled up: the
+        // rings where they meet carry no faces at all, because the wall picks
+        // the outline up at exactly the height the base leaves it at.
+        cap(footprint, 0, false);
+        band(footprint, 0, outer, P.baseChamfer);
+        band(outer, P.baseChamfer, outer, lo);
+        // Inside face of the bottom rim, when there is one to show.
+        if (lo - P.floorTop > 1e-7) band(inner, lo, inner, P.floorTop);
+        band(inner, P.floorTop, floorPad, P.floorT);
+        cap(floorPad, P.floorT, true);
+
+        // Rim: solid band with a funnel chamfer on the inside of the mouth.
+        band(outer, hi, outer, P.boxZ);
+        band(outer, P.boxZ, rimFlat, P.boxZ);
+        band(rimFlat, P.boxZ, inner, P.boxZ - P.rimChamfer);
+        band(inner, P.boxZ - P.rimChamfer, inner, hi);
+
+        var v = s.done();
+        return {
+          v: v,
+          holes: holes.length,
+          rows: rows.length,
+          cols: nCols,
+          area: shoelace(inner),
+          volume: volumeOf(v)
+        };
+      }
+
+      function shoelace(pts) {
+        var a = 0, i, j;
+        for (i = 0; i < pts.length; i++) {
+          j = (i + 1) % pts.length;
+          a += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+        }
+        return Math.abs(a) / 2;
+      }
+
+      // Signed volume of the soup, by the divergence theorem. The mesh is
+      // closed, so this is the exact volume of filament the part needs.
+      function volumeOf(v) {
+        var sum = 0, i;
+        for (i = 0; i < v.length; i += 9) {
+          sum += v[i] * (v[i + 4] * v[i + 8] - v[i + 5] * v[i + 7])
+               - v[i + 1] * (v[i + 3] * v[i + 8] - v[i + 5] * v[i + 6])
+               + v[i + 2] * (v[i + 3] * v[i + 7] - v[i + 4] * v[i + 6]);
+        }
+        return Math.abs(sum) / 6;
+      }
+
+      // Binary STL: an 80-byte header, the triangle count, then 50 bytes per
+      // facet. Slicers read the numbers as millimetres.
+      function toStl(v, label) {
+        var n = v.length / 9;
+        var buf = new ArrayBuffer(84 + n * 50);
+        var dv = new DataView(buf), c, i, k;
+        // Anything but a leading "solid", which would make readers parse the
+        // file as ASCII.
+        var head = (label || 'Organizer box (mm)').slice(0, 79);
+        for (c = 0; c < head.length; c++) dv.setUint8(c, head.charCodeAt(c) & 0x7f);
+        dv.setUint32(80, n, true);
+
+        var off = 84;
+        for (i = 0; i < n; i++) {
+          var p = i * 9;
+          var ux = v[p + 3] - v[p], uy = v[p + 4] - v[p + 1], uz = v[p + 5] - v[p + 2];
+          var wx = v[p + 6] - v[p], wy = v[p + 7] - v[p + 1], wz = v[p + 8] - v[p + 2];
+          var nx = uy * wz - uz * wy, ny = uz * wx - ux * wz, nz = ux * wy - uy * wx;
+          var len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+          dv.setFloat32(off, nx / len, true);
+          dv.setFloat32(off + 4, ny / len, true);
+          dv.setFloat32(off + 8, nz / len, true);
+          for (k = 0; k < 9; k++) dv.setFloat32(off + 12 + k * 4, v[p + k], true);
+          off += 50;
+        }
+        return new Uint8Array(buf);
+      }
+
+      // The OpenSCAD model this engine mirrors, with the parameter block
+      // rewritten to the numbers on screen.
+      function toScad(P) {
+        var src = document.getElementById('scad-source');
+        if (!src) return null;
+        var vals = {
+          box_x: P.boxX, box_y: P.boxY, box_z: P.boxZ,
+          corner_r: P.cornerR, wall: P.wall, floor_t: P.floorT,
+          floor_chamfer: P.floorChamfer, base_chamfer: P.baseChamfer,
+          base_h: P.baseH, rim_h: P.rimH, rim_chamfer: P.rimChamfer,
+          cell: P.cell, rib: P.rib, row_keep: P.rowKeep
+        };
+        return src.textContent.replace(/^(\w+) = [^;]+;/gm, function (line, name) {
+          if (!(name in vals)) return line;
+          return name + ' = ' + (Math.round(vals[name] * 1e6) / 1e6) + ';';
+        }).replace(/^\uFEFF/, '').trim() + '\n';
+      }
+
+      root.BoxEngine = { DEFAULTS: D, compute: compute, build: build, toStl: toStl, toScad: toScad };
+    })(typeof window !== 'undefined' ? window : this);
+  </script>
+</head>
+<body>
+  <header>
+    <div class="appbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 2.6 4.5 4.6v4L8 10.6l3.5-2v-4L8 2.6Z"/>
+            <path d="M16 2.6l-3.5 2v4l3.5 2 3.5-2v-4L16 2.6Z"/>
+            <path d="M12 9.6l-3.5 2v4l3.5 2 3.5-2v-4l-3.5-2Z"/>
+            <path d="M3 17v3.4a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V17"/>
+          </svg>
+        </div>
+        <div class="header-content">
+          <h1 id="header-title"></h1>
+          <div class="hint" id="header-hint"></div>
+        </div>
+      </div>
+      <div id="language-selector"></div>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <!-- The OpenSCAD model, kept in step with organizer_box.scad by
+       `make embed`. It is served to the user as the .scad download. -->
+  <script id="scad-source" type="text/plain">
+// Caixa organizadora com paredes em favo de mel.
+//
+// Reproduz a geometria de 200x100_4_V2.stl (100 x 200 x 64 mm, cantos em
+// superelipse, aro macico no topo) com a espessura da nervura do favo
+// configuravel. O original usa rib = 2; este ficheiro usa 4/3 (1/3 mais fino).
+//
+// base_h acrescenta um aro macico tambem em baixo, que o original nao tem; os
+// valores por omissao ficam fieis a peca de origem.
+
+/* [Corpo] */
+box_x = 100;         // largura
+box_y = 200;         // comprimento
+box_z = 64;          // altura
+corner_r = 10;       // raio dos cantos
+corner_n = 2.4;      // expoente da superelipse dos cantos
+wall = 3;            // espessura da parede
+floor_t = 2;         // espessura do fundo ao centro
+floor_chamfer = 1;   // chanfro a 45 graus na juncao fundo/parede
+base_chamfer = 2.5;  // chanfro a 45 graus na aresta inferior exterior
+base_h = 0;          // banda macica acima do fundo (o original nao tem)
+rim_h = 8;           // banda macica sob o bordo superior
+rim_chamfer = 2.5;   // chanfro a 45 graus no bordo interior de topo
+
+/* [Favo de mel] */
+cell = 10;           // passo da celula, medido entre faces
+rib = 4 / 3;         // material entre celulas vizinhas (original: 2)
+row_z0 = undef;      // cota de uma fiada; undef = escolhida automaticamente
+row_keep = 0.3;      // fraccao minima de um furo cortado pelo fundo ou pelo aro
+
+/* [Qualidade] */
+corner_steps = 60;   // segmentos por canto da superelipse
+$fs = 0.4;
+$fa = 2;
+
+SQRT3 = 1.7320508075688772;
+
+hole_r = (cell - rib) / SQRT3;   // circunraio do furo hexagonal
+col_pitch = cell / SQRT3 * 1.5;  // distancia horizontal entre colunas
+row_pitch = cell;                // distancia vertical dentro da mesma coluna
+
+floor_top = floor_t + floor_chamfer;  // cota do fundo junto a parede
+
+// A banda perfurada vive entre os dois aros macicos.
+band_bottom = floor_top + base_h;
+rim_bottom = box_z - rim_h;
+
+eps = 0.01;
+
+// ---------------------------------------------------------------- perfil 2D
+
+// Um quadrante de superelipse: |u|^n + |v|^n = 1.
+function se_arc(cx, cy, sx, sy, r, n, rev) =
+    [for (i = [0:corner_steps])
+        let (t = rev ? 90 - i * 90 / corner_steps : i * 90 / corner_steps)
+        [cx + sx * r * pow(cos(t), 2 / n), cy + sy * r * pow(sin(t), 2 / n)]];
+
+// Rectangulo w x l centrado na origem com cantos em superelipse de raio r.
+function squircle_rect(w, l, r, n) =
+    let (cx = w / 2 - r, cy = l / 2 - r)
+    concat(
+        se_arc( cx,  cy,  1,  1, r, n, false),
+        se_arc(-cx,  cy, -1,  1, r, n, true),
+        se_arc(-cx, -cy, -1, -1, r, n, false),
+        se_arc( cx, -cy,  1, -1, r, n, true));
+
+module outline(w, l) {
+    polygon(squircle_rect(w, l, corner_r, corner_n));
+}
+
+function path_len(p, i = 0) = i + 1 < len(p) ? norm(p[i + 1] - p[i]) + path_len(p, i + 1) : 0;
+
+corner_len = path_len(se_arc(0, 0, 1, 1, corner_r, corner_n, false));
+
+// Tronco recto entre dois perfis 2D, usado para os chanfros a 45 graus.
+module taper(z0, z1) {
+    hull() {
+        translate([0, 0, z0]) linear_extrude(eps) children(0);
+        translate([0, 0, z1 - eps]) linear_extrude(eps) children(1);
+    }
+}
+
+// ------------------------------------------------------------------- solido
+
+module shell() {
+    translate([0, 0, base_chamfer])
+        linear_extrude(box_z - base_chamfer) outline(box_x, box_y);
+    taper(0, base_chamfer) {
+        offset(r = -base_chamfer) outline(box_x, box_y);
+        outline(box_x, box_y);
+    }
+}
+
+module cavity() {
+    iw = box_x - 2 * wall;
+    il = box_y - 2 * wall;
+
+    taper(floor_t, floor_top) {
+        offset(r = -floor_chamfer) outline(iw, il);
+        outline(iw, il);
+    }
+    translate([0, 0, floor_top - eps])
+        linear_extrude(box_z - rim_chamfer - floor_top + eps) outline(iw, il);
+    taper(box_z - rim_chamfer, box_z + eps) {
+        outline(iw, il);
+        offset(r = rim_chamfer) outline(iw, il);
+    }
+}
+
+// --------------------------------------------------------------- favo de mel
+
+hole_hh = (cell - rib) / 2;              // meia altura do furo, entre faces
+slot_pitch = row_pitch / 2;              // fiadas pares e impares intercalam
+band_mid = (band_bottom + rim_bottom) / 2;
+
+function slot_m0(z0) = floor((band_bottom - hole_hh - z0) / slot_pitch);
+function slot_m1(z0) = ceil((rim_bottom + hole_hh - z0) / slot_pitch);
+
+// Quanto resta de um furo depois de cortado pelos dois aros, em fraccao da sua
+// altura. Zero quando a fiada nao chega a banda perfurada.
+function slot_kept(zc) =
+    max(0, min(zc + hole_hh, rim_bottom) - max(zc - hole_hh, band_bottom)) / (2 * hole_hh);
+
+function sum(v, i = 0) = i < len(v) ? v[i] + sum(v, i + 1) : 0;
+
+// Area aberta que uma dada fase deixa, ignorando os furos demasiado cortados.
+function phase_open(z0) =
+    sum([for (m = [slot_m0(z0):slot_m1(z0)])
+            let (k = slot_kept(z0 + m * slot_pitch)) k >= row_keep ? k : 0]);
+
+// Duas fases mantem a malha simetrica na banda: uma fiada ao centro, ou duas a
+// ladea-lo. Fica a que deixa mais furo aberto.
+function auto_z0() =
+    phase_open(band_mid + slot_pitch / 2) > phase_open(band_mid)
+        ? band_mid + slot_pitch / 2 : band_mid;
+
+z0 = is_undef(row_z0) ? auto_z0() : row_z0;
+
+// Campo de hexagonos no plano da parede: x tangencial, y = cota z real.
+// So entram celulas cujo centro cai no troco recto da parede e cujo furo nao
+// passa do meio do canto, onde comeca a parede seguinte.
+module hex_field(half_span) {
+    nj = min(floor(half_span / col_pitch),
+             floor((half_span + corner_len / 2 - hole_r) / col_pitch));
+
+    intersection() {
+        union() {
+            for (j = [-nj:nj], m = [slot_m0(z0):slot_m1(z0)])
+                if ((j - m) % 2 == 0 && slot_kept(z0 + m * slot_pitch) >= row_keep)
+                    translate([j * col_pitch, z0 + m * slot_pitch])
+                        circle(r = hole_r, $fn = 6);
+        }
+        translate([0, band_mid])
+            square([2 * half_span + 4 * hole_r, rim_bottom - band_bottom], center = true);
+    }
+}
+
+module honeycomb() {
+    // Paredes longas (normal em X).
+    rotate([90, 0, 90])
+        linear_extrude(box_x + 20, center = true) hex_field(box_y / 2 - corner_r);
+    // Paredes curtas (normal em Y).
+    rotate([90, 0, 0])
+        linear_extrude(box_y + 20, center = true) hex_field(box_x / 2 - corner_r);
+}
+
+// --------------------------------------------------------------------- peca
+
+difference() {
+    shell();
+    cavity();
+    honeycomb();
+}
+</script>
+
+  <script>
+  (function () {
+    var h = React.createElement;
+    var BE = window.BoxEngine;
+
+    window.__currentLanguage = 'pt';
+    window.__languageListeners = [];
+
+    function fmt(str, args) {
+      return String(str).replace(/\{(\d+)\}/g, function (m, i) {
+        return args[+i] != null ? args[+i] : m;
+      });
+    }
+    function useLang() {
+      var s = React.useState(window.__currentLanguage);
+      var lang = s[0], setLang = s[1];
+      React.useEffect(function () {
+        var l = function (v) { setLang(v); };
+        window.__languageListeners.push(l);
+        return function () {
+          window.__languageListeners = window.__languageListeners.filter(function (x) { return x !== l; });
+        };
+      }, []);
+      return function (key) {
+        var v = (window.I18N[lang] && window.I18N[lang][key]) || window.I18N.en[key] || key;
+        return arguments.length > 1 ? fmt(v, Array.prototype.slice.call(arguments, 1)) : v;
+      };
+    }
+
+    function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+    function n1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
+    function n2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+
+    function download(blob, name) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    }
+
+    var CHEVRON = 'M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z';
+
+    function Field(p) {
+      return h('div', { className: 'field' },
+        h('label', null, p.label, p.badge ? h('span', { className: 'locked' }, p.badge) : null),
+        p.children,
+        p.hint ? h('div', { className: 'hint', style: { marginTop: '6px' } }, p.hint) : null
+      );
+    }
+
+    function NumberInput(p) {
+      return h('input', {
+        type: 'number', value: p.value, min: p.min, max: p.max, step: p.step || 1,
+        onChange: function (e) { p.onChange(e.target.value); }
+      });
+    }
+
+    function Select(p) {
+      var stOpen = React.useState(false); var open = stOpen[0], setOpen = stOpen[1];
+      var ref = React.useRef(null);
+
+      React.useEffect(function () {
+        var close = function (e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        var esc = function (e) { if (e.key === 'Escape') setOpen(false); };
+        document.addEventListener('mousedown', close);
+        document.addEventListener('scroll', close, true);
+        document.addEventListener('keydown', esc);
+        return function () {
+          document.removeEventListener('mousedown', close);
+          document.removeEventListener('scroll', close, true);
+          document.removeEventListener('keydown', esc);
+        };
+      }, []);
+
+      var chosen = p.options.filter(function (o) { return o[0] === p.value; })[0];
+
+      return h('div', { ref: ref, className: 'select-wrapper' + (open ? ' open' : '') },
+        h('button', {
+          type: 'button', className: 'select-button',
+          'aria-haspopup': 'listbox', 'aria-expanded': open ? 'true' : 'false',
+          onClick: function (e) { e.stopPropagation(); setOpen(!open); }
+        },
+          h('span', { className: 'select-label' }, chosen ? chosen[1] : ''),
+          h('svg', {
+            xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20',
+            fill: 'currentColor', className: 'select-arrow', 'aria-hidden': 'true'
+          }, h('path', { fillRule: 'evenodd', clipRule: 'evenodd', d: CHEVRON }))
+        ),
+        open ? h('div', { className: 'select-menu open', role: 'listbox' },
+          p.options.map(function (o) {
+            return h('button', {
+              key: String(o[0]), type: 'button', role: 'option',
+              'aria-selected': o[0] === p.value ? 'true' : 'false',
+              className: 'select-option' + (o[0] === p.value ? ' selected' : ''),
+              onMouseDown: function (e) {
+                e.preventDefault(); e.stopPropagation();
+                setOpen(false); p.onChange(o[0]);
+              }
+            }, o[1]);
+          })
+        ) : null
+      );
+    }
+
+    // -------------------------------------------------------------
+    // Shared WebGL viewport
+    // -------------------------------------------------------------
+    function useStage3D(o) {
+      var hostRef = React.useRef(null), ref = React.useRef(null);
+      var camRef = React.useRef(null), dragRef = React.useRef(null);
+      var stFail = React.useState(false); var failed = stFail[0], setFailed = stFail[1];
+      var stMax = React.useState(false); var maxed = stMax[0], setMaxed = stMax[1];
+
+      if (!camRef.current) camRef.current = {
+        azimuth: o.azimuth, polar: o.polar, distance: o.distance,
+        min: o.min, max: o.max, target: { x: 0, y: 0, z: 0 }
+      };
+
+      React.useEffect(function () {
+        var host = hostRef.current;
+        if (!host || !window.THREE) { setFailed(true); return; }
+
+        var renderer;
+        try {
+          renderer = new THREE.WebGLRenderer({ antialias: true });
+        } catch (e) { setFailed(true); return; }
+
+        THREE.ColorManagement.legacyMode = false;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        host.appendChild(renderer.domElement);
+
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color('#eef0f3');
+        var camera = new THREE.PerspectiveCamera(38, 1.6, 0.05, 200);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+        var key = new THREE.DirectionalLight(0xffffff, 0.85);
+        key.position.set(2.4, 4.2, 2.2); scene.add(key);
+        var fill = new THREE.DirectionalLight(0xffffff, 0.3);
+        fill.position.set(-2.6, 1.6, -2.2); scene.add(fill);
+
+        var st = { renderer: renderer, scene: scene, camera: camera, frame: 0 };
+
+        function render() {
+          st.frame = 0;
+          var c = camRef.current, sp = Math.sin(c.polar), t = c.target;
+          camera.position.set(
+            t.x + c.distance * sp * Math.sin(c.azimuth),
+            t.y + c.distance * Math.cos(c.polar),
+            t.z + c.distance * sp * Math.cos(c.azimuth)
+          );
+          camera.lookAt(t.x, t.y, t.z);
+          renderer.render(scene, camera);
+        }
+        // Nothing moves on its own, so only draw when something changed.
+        st.request = function () { if (!st.frame) st.frame = requestAnimationFrame(render); };
+        ref.current = st;
+
+        function resize() {
+          var w = host.clientWidth, hh = host.clientHeight;
+          if (!w || !hh) return;
+          renderer.setSize(w, hh, false);
+          camera.aspect = w / hh;
+          camera.updateProjectionMatrix();
+          st.request();
+        }
+        var ro = new ResizeObserver(resize);
+        ro.observe(host);
+        resize();
+
+        function onWheel(e) {
+          e.preventDefault();
+          var c = camRef.current;
+          c.distance = clamp(c.distance * (e.deltaY < 0 ? 0.9 : 1 / 0.9), c.min, c.max);
+          st.request();
+        }
+        host.addEventListener('wheel', onWheel, { passive: false });
+
+        return function () {
+          ro.disconnect();
+          host.removeEventListener('wheel', onWheel);
+          if (st.frame) cancelAnimationFrame(st.frame);
+          scene.traverse(function (obj) {
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) obj.material.dispose();
+          });
+          renderer.dispose();
+          if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+          ref.current = null;
+        };
+      }, []);
+
+      React.useEffect(function () {
+        if (!maxed) return;
+        var previous = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        function onKey(e) { if (e.key === 'Escape') setMaxed(false); }
+        document.addEventListener('keydown', onKey);
+        return function () {
+          document.body.style.overflow = previous;
+          document.removeEventListener('keydown', onKey);
+        };
+      }, [maxed]);
+
+      return {
+        ref: ref, hostRef: hostRef, cam: camRef, drag: dragRef,
+        failed: failed, maxed: maxed, setMaxed: setMaxed,
+        request: function () { if (ref.current) ref.current.request(); }
+      };
+    }
+
+    var EXPAND = 'M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5';
+    var SHRINK = 'M9 4v5H4M15 20v-5h5M20 9h-5V4M4 15h5v5';
+
+    function Stage3D(p) {
+      var s = p.stage, t = p.t, maxed = s.maxed;
+
+      function onPointerDown(e) {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        s.drag.current = {
+          x: e.clientX, y: e.clientY,
+          pan: e.shiftKey || e.button === 1 || e.button === 2
+        };
+      }
+      function onPointerMove(e) {
+        var drag = s.drag.current;
+        if (!drag) return;
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        drag.x = e.clientX; drag.y = e.clientY;
+        var c = s.cam.current;
+        if (drag.pan) {
+          var polar = c.polar, az = c.azimuth;
+          var sx = Math.sin(polar), cx = Math.cos(polar);
+          var sy = Math.sin(az), cy = Math.cos(az);
+          var rx = cy, rz = -sy;
+          var ux = -cx * sy, uy = sx, uz = -cx * cy;
+          var k = c.distance * 0.0022;
+          c.target.x += (rx * dx - ux * dy) * k;
+          c.target.y += (-uy * dy) * k;
+          c.target.z += (rz * dx - uz * dy) * k;
+        } else {
+          c.azimuth -= dx * 0.008;
+          c.polar = clamp(c.polar - dy * 0.006, 0.06, 1.5);
+        }
+        s.request();
+      }
+      function onPointerUp(e) {
+        s.drag.current = null;
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+
+      return h(React.Fragment, null,
+        maxed ? h('div', {
+          className: 'stageBackdrop', onClick: function () { s.setMaxed(false); }
+        }) : null,
+        h('div', { className: 'stageBox' },
+          h('div', {
+            className: 'stage3d' + (maxed ? ' max' : ''), ref: s.hostRef,
+            onPointerDown: onPointerDown, onPointerMove: onPointerMove,
+            onPointerUp: onPointerUp, onPointerCancel: onPointerUp,
+            onContextMenu: function (e) { e.preventDefault(); }
+          },
+            h('button', {
+              type: 'button', className: 'expand',
+              title: t(maxed ? 'minimize' : 'maximize'),
+              'aria-label': t(maxed ? 'minimize' : 'maximize'),
+              onPointerDown: function (e) { e.stopPropagation(); },
+              onClick: function (e) { e.stopPropagation(); s.setMaxed(!maxed); }
+            },
+              h('svg', {
+                viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+                strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
+              }, h('path', { d: maxed ? SHRINK : EXPAND }))
+            )
+          )
+        )
+      );
+    }
+
+    // -------------------------------------------------------------
+    // App
+    // -------------------------------------------------------------
+    var PRESETS = [
+      ['100x200x64', '100 × 200 × 64', { boxX: 100, boxY: 200, boxZ: 64 }],
+      ['100x100x64', '100 × 100 × 64', { boxX: 100, boxY: 100, boxZ: 64 }],
+      ['200x200x64', '200 × 200 × 64', { boxX: 200, boxY: 200, boxZ: 64 }],
+      ['150x150x40', '150 × 150 × 40', { boxX: 150, boxY: 150, boxZ: 40 }],
+      ['80x160x100', '80 × 160 × 100', { boxX: 80, boxY: 160, boxZ: 100 }]
+    ];
+
+    function App() {
+      var t = useLang();
+      var st = React.useState({
+        boxX: 100, boxY: 200, boxZ: 64,
+        wall: 3, floorT: 2, baseH: 8, rimH: 8, cornerR: 10,
+        cell: 10, rib: 1.333
+      });
+      var o = st[0], setO = st[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      var stColor = React.useState('#5b6470'); var colour = stColor[0], setColour = stColor[1];
+
+      var P = React.useMemo(function () { return BE.compute(o); }, [o]);
+      var model = React.useMemo(function () {
+        return P.valid ? BE.build(P) : null;
+      }, [P]);
+
+      var stage = useStage3D({ azimuth: 0.85, polar: 1.02, distance: 3.2, min: 0.9, max: 14 });
+      var meshRef = React.useRef(null);
+
+      // Rebuild the preview mesh whenever the solid changes. The scene works
+      // in units of 100 mm so the camera never has to travel far.
+      React.useEffect(function () {
+        var stg = stage.ref.current;
+        if (!stg) return;
+        if (meshRef.current) {
+          stg.scene.remove(meshRef.current);
+          meshRef.current.geometry.dispose();
+          meshRef.current.material.dispose();
+          meshRef.current = null;
+        }
+        if (model) {
+          var geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.BufferAttribute(model.v.slice(), 3));
+          geo.computeVertexNormals();
+          // Sit the box on the origin, upright, scaled to metres-ish.
+          var k = 0.01;
+          geo.rotateX(-Math.PI / 2);
+          geo.scale(k, k, k);
+          geo.translate(0, -P.boxZ * k / 2, 0);
+          var mat = new THREE.MeshStandardMaterial({ color: colour, roughness: 0.62, metalness: 0.02 });
+          var mesh = new THREE.Mesh(geo, mat);
+          stg.scene.add(mesh);
+          meshRef.current = mesh;
+        }
+        stage.request();
+      }, [model, colour]);
+
+      // Frame the piece: enough distance that the longest side always fits.
+      React.useEffect(function () {
+        var span = Math.max(P.boxX, P.boxY, P.boxZ) * 0.01;
+        stage.cam.current.distance = clamp(span * 2.4, 0.9, 14);
+        stage.cam.current.max = Math.max(14, span * 8);
+        stage.request();
+      }, [P.boxX, P.boxY, P.boxZ]);
+
+      var presetValue = 'custom';
+      PRESETS.forEach(function (p) {
+        if (p[2].boxX === +o.boxX && p[2].boxY === +o.boxY && p[2].boxZ === +o.boxZ) presetValue = p[0];
+      });
+
+      function baseName() {
+        return 'caixa-' + Math.round(P.boxX) + 'x' + Math.round(P.boxY) + 'x' + Math.round(P.boxZ)
+          + '-c' + n1(P.cell) + '-n' + n2(P.rib);
+      }
+      function saveStl() {
+        if (!model) return;
+        download(new Blob([BE.toStl(model.v, 'Organizer box ' + baseName())], { type: 'model/stl' }),
+          baseName() + '.stl');
+      }
+      function saveScad() {
+        var src = BE.toScad(P);
+        if (!src) return;
+        download(new Blob([src], { type: 'text/plain' }), baseName() + '.scad');
+      }
+
+      var warnings = [];
+      if (!P.valid) warnings.push(['err', t('errSize')]);
+      else {
+        if (P.band < P.cell) warnings.push(['warn', t('warnBand', n1(P.band))]);
+        if (P.rib < 1.2) warnings.push(['warn', t('warnRib', n2(P.rib))]);
+        if (Math.max(P.boxX, P.boxY) > 230) warnings.push(['warn', t('warnBed', n1(P.boxX), n1(P.boxY))]);
+      }
+
+      var litres = model ? model.area * (P.boxZ - P.floorT) / 1e6 : 0;
+      var cm3 = model ? model.volume / 1000 : 0;
+
+      return h(React.Fragment, null,
+        h('div', { className: 'row' },
+          h('div', { className: 'col' },
+            h('div', { className: 'card' },
+              h('h2', null, t('sizeCard')),
+              h(Field, { label: t('preset') },
+                h(Select, {
+                  value: presetValue,
+                  options: PRESETS.map(function (p) { return [p[0], p[1] + ' mm']; })
+                    .concat([['custom', t('presetCustom')]]),
+                  onChange: function (v) {
+                    var p = PRESETS.filter(function (x) { return x[0] === v; })[0];
+                    if (p) setO(Object.assign({}, o, p[2]));
+                  }
+                })
+              ),
+              h('div', { className: 'grid2' },
+                h(Field, { label: t('width') },
+                  h(NumberInput, { value: o.boxX, min: 24, max: 500, onChange: function (v) { set('boxX', v); } })),
+                h(Field, { label: t('length') },
+                  h(NumberInput, { value: o.boxY, min: 24, max: 500, onChange: function (v) { set('boxY', v); } })),
+                h(Field, { label: t('height') },
+                  h(NumberInput, { value: o.boxZ, min: 10, max: 400, onChange: function (v) { set('boxZ', v); } }))
+              )
+            ),
+
+            h('div', { className: 'card' },
+              h('h2', null, t('shellCard')),
+              h('div', { className: 'grid2' },
+                h(Field, { label: t('wall') },
+                  h(NumberInput, { value: o.wall, min: 1, max: 12, step: 0.1, onChange: function (v) { set('wall', v); } })),
+                h(Field, { label: t('floor') },
+                  h(NumberInput, { value: o.floorT, min: 0.8, max: 20, step: 0.2, onChange: function (v) { set('floorT', v); } })),
+                h(Field, { label: t('base') },
+                  h(NumberInput, { value: o.baseH, min: 0, max: 40, step: 0.5, onChange: function (v) { set('baseH', v); } })),
+                h(Field, { label: t('rim') },
+                  h(NumberInput, { value: o.rimH, min: 1.5, max: 40, step: 0.5, onChange: function (v) { set('rimH', v); } })),
+                h(Field, { label: t('corner') },
+                  h(NumberInput, { value: o.cornerR, min: P.wall, max: 60, step: 0.5, onChange: function (v) { set('cornerR', v); } }))
+              ),
+              h('div', { className: 'hint' }, t('shellHint'))
+            ),
+
+            h('div', { className: 'card' },
+              h('h2', null, t('gridCard')),
+              h('div', { className: 'grid2' },
+                h(Field, { label: t('cell'), badge: t('keepsScale') },
+                  h(NumberInput, { value: o.cell, min: 3, max: 80, step: 0.5, onChange: function (v) { set('cell', v); } })),
+                h(Field, { label: t('rib'), badge: t('keepsScale') },
+                  h(NumberInput, { value: o.rib, min: 0.3, max: 10, step: 0.1, onChange: function (v) { set('rib', v); } }))
+              ),
+              h('div', { className: 'hint' }, t('gridHint')),
+              h('div', { className: 'hint', style: { marginTop: '6px' } },
+                t('gridHole', n2(P.holeAF), n2(2 * P.holeR)))
+            )
+          ),
+
+          h('div', { className: 'col col-wide' },
+            h('div', { className: 'card' },
+              h('h2', null, t('previewCard')),
+              warnings.map(function (w, i) {
+                return h('div', { key: i, className: 'alert ' + w[0] }, w[1]);
+              }),
+              stage.failed
+                ? h('div', { className: 'alert err' }, t('error3D'))
+                : h(Stage3D, { stage: stage, t: t }),
+              h('div', { className: 'swatch' },
+                h('input', {
+                  type: 'color', value: colour, 'aria-label': t('colour'),
+                  onChange: function (e) { setColour(e.target.value); }
+                }),
+                h('div', { className: 'hint' }, t('dragHint'))
+              )
+            ),
+
+            h('div', { className: 'card' },
+              h('h2', null, t('summaryCard')),
+              h('div', { className: 'stat' }, h('span', null, t('inner')),
+                h('b', null, n1(P.boxX - 2 * P.wall) + ' × ' + n1(P.boxY - 2 * P.wall) + ' × ' + n1(P.boxZ - P.floorT) + ' mm')),
+              h('div', { className: 'stat' }, h('span', null, t('capacity')),
+                h('b', null, n2(litres) + ' L')),
+              h('div', { className: 'stat' }, h('span', null, t('cells')),
+                h('b', null, model ? String(model.holes) : '—')),
+              h('div', { className: 'stat' }, h('span', null, t('rowsCols')),
+                h('b', null, model ? model.rows + ' × ' + model.cols : '—')),
+              h('div', { className: 'stat' }, h('span', null, t('material')),
+                h('b', null, n1(cm3) + ' cm³')),
+              h('div', { className: 'stat' }, h('span', null, t('weight')),
+                h('b', null, n1(cm3 * 1.24) + ' g')),
+              h('div', { className: 'stat' }, h('span', null, t('triangles')),
+                h('b', null, model ? String(model.v.length / 9) : '—')),
+              h('div', { className: 'controls bar' },
+                h('button', {
+                  type: 'button', className: 'btn grow', disabled: !model, onClick: saveStl
+                },
+                  h('svg', {
+                    viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+                    strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
+                  }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
+                  t('download')),
+                h('button', {
+                  type: 'button', className: 'btn secondary', disabled: !model, onClick: saveScad
+                }, t('downloadScad'))
+              )
+            )
+          )
+        ),
+        h('footer', null, t('footerText'))
+      );
+    }
+
+    function LanguageSelector() {
+      var stL = React.useState(window.__currentLanguage); var lang = stL[0], setLang = stL[1];
+      var stO = React.useState(false); var isOpen = stO[0], setIsOpen = stO[1];
+      var ref = React.useRef(null);
+      var t = function (k) { return (window.I18N[lang] && window.I18N[lang][k]) || window.I18N.en[k] || k; };
+
+      React.useEffect(function () {
+        var close = function (e) { if (ref.current && !ref.current.contains(e.target)) setIsOpen(false); };
+        document.addEventListener('mousedown', close);
+        document.addEventListener('scroll', close, true);
+        return function () {
+          document.removeEventListener('mousedown', close);
+          document.removeEventListener('scroll', close, true);
+        };
+      }, []);
+
+      React.useEffect(function () {
+        document.documentElement.lang = lang;
+        document.title = t('title');
+        document.getElementById('header-title').textContent = t('title');
+        document.getElementById('header-hint').textContent = t('headerHint');
+      }, [lang]);
+
+      function change(code) {
+        setLang(code); setIsOpen(false);
+        window.__currentLanguage = code;
+        window.__languageListeners.forEach(function (l) { l(code); });
+      }
+
+      var languages = [
+        { code: 'pt', flag: 'https://flagcdn.com/w20/pt.png', name: 'Português' },
+        { code: 'en', flag: 'https://flagcdn.com/w20/gb.png', name: 'English' }
+      ];
+      var sel = languages.filter(function (l) { return l.code === lang; })[0];
+
+      return h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+        h('span', null, t('language') + ':'),
+        h('div', { ref: ref, className: 'custom-select-wrapper' },
+          h('button', {
+            type: 'button', className: 'custom-select-button',
+            onClick: function (e) { e.stopPropagation(); setIsOpen(!isOpen); }
+          },
+            h('span', { className: 'custom-select-label' },
+              h('img', { src: sel.flag, alt: sel.code.toUpperCase(), className: 'flag-icon' }),
+              h('span', null, sel.name)),
+            h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20', fill: 'currentColor', className: 'custom-select-arrow' },
+              h('path', { fillRule: 'evenodd', clipRule: 'evenodd', d: CHEVRON }))
+          ),
+          isOpen ? h('div', { className: 'custom-select-menu open' },
+            languages.map(function (l) {
+              return h('button', {
+                key: l.code, type: 'button',
+                className: 'custom-select-option' + (l.code === lang ? ' selected' : ''),
+                onMouseDown: function (e) { e.preventDefault(); e.stopPropagation(); change(l.code); }
+              },
+                h('img', { src: l.flag, alt: l.code.toUpperCase(), className: 'flag-icon' }),
+                h('span', null, l.name));
+            })
+          ) : null
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+    ReactDOM.createRoot(document.getElementById('language-selector')).render(h(LanguageSelector));
+
+    var init = window.I18N[window.__currentLanguage] || window.I18N.en;
+    document.title = init.title;
+    document.getElementById('header-title').textContent = init.title;
+    document.getElementById('header-hint').textContent = init.headerHint;
+  })();
+  </script>
+</body>
+</html>
