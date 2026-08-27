@@ -24,6 +24,14 @@ mais favos, todos do mesmo tamanho.
 - **Fundo em colmeia** — fura o fundo com a mesma grelha hexagonal
 - **Pegas nas paredes** — abre uma ranhura oval perto do topo em cada parede que
   escolheres (+X, −X, +Y, −Y), com a mesma forma da pega da tampa
+- **Porta-etiquetas** — moldura saliente no topo de cada parede que escolheres,
+  assente na superfície exterior. Só tem borda inferior e laterais: a etiqueta
+  entra por cima e fica à vista, presa pela soleira e pelos retornos das duas
+  calhas — os três encaixes agarram 2,5 mm cada, para a moldura fechar por
+  igual. A bolsa tem 2,4 mm, para uma etiqueta impressa de 2 mm. A soleira
+  leva um chanfre a 45° por baixo, por isso imprime sem suportes. O painel
+  indica o tamanho da etiqueta a imprimir para cada parede. Uma parede leva
+  pega ou porta-etiquetas, nunca os dois: ligar um desliga o outro
 - **Tampa** — peça sólida que usa o mesmo encaixe das caixas: por baixo leva o
   pé chanfrado da caixa, por cima leva o rebaixo da boca. Assenta na caixa como
   uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa
@@ -35,7 +43,7 @@ mais favos, todos do mesmo tamanho.
 ## Uso
 
 1. Abre `index.html` no browser
-2. Ajusta medidas, grelha, pegas e tampa
+2. Ajusta medidas, grelha, pegas, porta-etiquetas e tampa
 3. Vê a peça em 3D e descarrega o STL
 
 A interface está em inglês, português, espanhol, francês, alemão, italiano,
