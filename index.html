@@ -1137,6 +1137,13 @@
         return { pts: out, depth: depth };
       }
 
+      // Narrow dimension of a finger slot. The lid and the walls both read it
+      // from here, so the two grips stay the same size as each other whatever
+      // the box does.
+      function gripWidth(P) {
+        return clamp(Math.min(P.boxX, P.boxY) * 0.13, 11, 26);
+      }
+
       // Half-widths up a stadium lying on its side: a flat run of 2(L-r) with a
       // semicircular cap at each end. Sampling it once here keeps the wall
       // faces and the opening's side walls on the same chords.
@@ -1313,7 +1320,7 @@
           // Grip near the top of the band, the same stadium the lid uses for
           // its finger slot, laid on its side along the wall.
           if (wantHandle[loop.runs[r].wall] && half > 14 && P.band > 14) {
-            var gr = Math.min(clamp(P.band * 0.18, 5.5, 13), (P.band - 4) / 2);
+            var gr = Math.min(gripWidth(P) / 2, (P.band - 4) / 2);
             // Never past the ends of the straight run, even if that means a
             // shallower slot than the proportions ask for.
             var gL = Math.min(Math.max(half * 0.32, gr + 8), half * 0.6, 45);
@@ -1906,8 +1913,8 @@
 
         if (roomy && P.lidGrip) {
           var alongY = P.boxY >= P.boxX;
-          var lng = alongY ? P.boxY : P.boxX, srt = alongY ? P.boxX : P.boxY;
-          var gw = clamp(srt * 0.13, 11, 26);
+          var lng = alongY ? P.boxY : P.boxX;
+          var gw = gripWidth(P);
           var gl = clamp(lng * 0.3, gw + 14, lng * 0.5);
           // Shrink until the slot clears both faces, or drop it altogether.
           for (k = 0; k < 12 && !gripBox; k++) {
