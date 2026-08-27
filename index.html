@@ -353,6 +353,7 @@
       viewLid: 'Tampa',
       viewBoth: 'Ambas',
       downloadLid: 'Descarregar STL da tampa',
+      downloadBoth: 'Descarregar os dois STL',
 
       download: 'Descarregar STL',
 
@@ -423,6 +424,7 @@
       viewLid: 'Lid',
       viewBoth: 'Both',
       downloadLid: 'Download lid STL',
+      downloadBoth: 'Download both STLs',
 
       download: 'Download STL',
 
@@ -493,6 +495,7 @@
       viewLid: 'Tapa',
       viewBoth: 'Ambas',
       downloadLid: 'Descargar STL de la tapa',
+      downloadBoth: 'Descargar los dos STL',
 
       download: 'Descargar STL',
 
@@ -563,6 +566,7 @@
       viewLid: 'Couvercle',
       viewBoth: 'Les deux',
       downloadLid: 'Télécharger le STL du couvercle',
+      downloadBoth: 'Télécharger les deux STL',
 
       download: 'Télécharger STL',
 
@@ -633,6 +637,7 @@
       viewLid: 'Deckel',
       viewBoth: 'Beides',
       downloadLid: 'Deckel-STL herunterladen',
+      downloadBoth: 'Beide STL herunterladen',
 
       download: 'STL herunterladen',
 
@@ -703,6 +708,7 @@
       viewLid: 'Coperchio',
       viewBoth: 'Entrambi',
       downloadLid: 'Scarica STL del coperchio',
+      downloadBoth: 'Scarica entrambi gli STL',
 
       download: 'Scarica STL',
 
@@ -773,6 +779,7 @@
       viewLid: '盖子',
       viewBoth: '两者',
       downloadLid: '下载盖子 STL',
+      downloadBoth: '下载两个 STL',
 
       download: '下载 STL',
 
@@ -843,6 +850,7 @@
       viewLid: 'ふた',
       viewBoth: '両方',
       downloadLid: 'ふたの STL をダウンロード',
+      downloadBoth: '両方の STL をダウンロード',
 
       download: 'STL をダウンロード',
 
@@ -2312,15 +2320,23 @@
         return 'caixa-' + Math.round(P.boxX) + 'x' + Math.round(P.boxY) + 'x' + Math.round(P.boxZ)
           + '-c' + n1(P.cell) + '-n' + n2(P.rib);
       }
-      function saveStl() {
-        if (!model) return;
-        download(new Blob([BE.toStl(model.v, 'Organizer box ' + baseName())], { type: 'model/stl' }),
-          baseName() + '.stl');
-      }
-      function saveLidStl() {
-        if (!lidModel) return;
-        download(new Blob([BE.toStl(lidModel.v, 'Organizer lid ' + baseName())], { type: 'model/stl' }),
-          baseName() + '-tampa.stl');
+      // Saves whatever the preview is showing, so the toggle above picks the
+      // files as well as the view.
+      var wantsBox = view !== 'lid' && !!model;
+      var wantsLid = view !== 'box' && !!lidModel;
+      function saveSelection() {
+        var name = baseName();
+        if (wantsBox) {
+          download(new Blob([BE.toStl(model.v, 'Organizer box ' + name)], { type: 'model/stl' }),
+            name + '.stl');
+        }
+        if (wantsLid) {
+          // Staggered, or the browser lumps the pair into one blocked popup.
+          setTimeout(function () {
+            download(new Blob([BE.toStl(lidModel.v, 'Organizer lid ' + name)], { type: 'model/stl' }),
+              name + '-tampa.stl');
+          }, wantsBox ? 400 : 0);
+        }
       }
 
       var warnings = [];
@@ -2484,16 +2500,15 @@
                 h('b', null, model ? String(model.v.length / 9) : '—')),
               h('div', { className: 'controls bar' },
                 h('button', {
-                  type: 'button', className: 'btn grow', disabled: !model, onClick: saveStl
+                  type: 'button', className: 'btn grow',
+                  disabled: !wantsBox && !wantsLid, onClick: saveSelection
                 },
                   h('svg', {
                     viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
                     strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
                   }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
-                  t('download')),
-                P.withLid ? h('button', {
-                  type: 'button', className: 'btn secondary grow', disabled: !lidModel, onClick: saveLidStl
-                }, t('downloadLid')) : null
+                  wantsBox && wantsLid ? t('downloadBoth')
+                    : (wantsLid ? t('downloadLid') : t('download')))
               )
             )
           )
