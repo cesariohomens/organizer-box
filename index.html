@@ -278,6 +278,10 @@
       background:var(--surface); cursor:pointer; flex-shrink:0;
     }
     .swatch input[type="color"]:focus-visible { outline:none; box-shadow:var(--ring); }
+    /* Two colours side by side, each with its own caption. */
+    .swatches { display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; }
+    .swatches .swatch { margin-top:0; }
+    .swatches label { margin-bottom:0; }
 
     @media (max-width:640px) {
       :root { --gutter:14px; }
@@ -348,7 +352,10 @@
       handlesHint: 'Abre uma ranhura oval perto do topo da colmeia em cada parede seleccionada, igual à pega da tampa.',
       labelsCard: 'Porta-etiquetas',
       labelsHint: 'Moldura saliente no topo de cada parede escolhida, só com borda inferior e laterais. A etiqueta entra por cima. Se a parede também levar pega, a moldura desce para debaixo dela.',
-      labelCard: 'Etiqueta a imprimir: {0} × {1} mm nas paredes ±Y, {2} × {3} mm nas ±X, {4} mm de espessura.',
+      labelWidth: 'Largura {0} (mm)',
+      labelSize: 'Etiqueta a imprimir: {0} × {1} mm, {2} mm de espessura.',
+      labelBaseColour: 'Base da etiqueta',
+      labelTextColour: 'Texto da etiqueta',
       labelText: 'Texto {0}',
       labelTextHint: 'ex.: PARAFUSOS M3',
       labelSmall: 'A esta dimensão o texto sai mais fino do que um cordão de material. Encurta-o ou usa uma caixa maior.',
@@ -429,7 +436,10 @@
       handlesHint: 'Cut an oval slot near the top of the honeycomb on each selected wall, the same shape as the lid grip.',
       labelsCard: 'Label holders',
       labelsHint: 'A raised frame at the top of each wall you pick, bottom and sides only. The label drops in from above. If the wall also has a grip, the frame sits below it.',
-      labelCard: 'Label to print: {0} × {1} mm on the ±Y walls, {2} × {3} mm on the ±X, {4} mm thick.',
+      labelWidth: '{0} width (mm)',
+      labelSize: 'Label to print: {0} × {1} mm, {2} mm thick.',
+      labelBaseColour: 'Label base',
+      labelTextColour: 'Label text',
       labelText: '{0} text',
       labelTextHint: 'e.g. M3 SCREWS',
       labelSmall: 'At this size the strokes come out thinner than a single bead. Shorten the text or use a bigger box.',
@@ -510,7 +520,10 @@
       handlesHint: 'Abre una ranura ovalada cerca de la parte superior del panal en cada pared seleccionada, igual que el asa de la tapa.',
       labelsCard: 'Portaetiquetas',
       labelsHint: 'Marco saliente en lo alto de cada pared elegida, sólo con borde inferior y laterales. La etiqueta entra por arriba. Si la pared también lleva asa, el marco baja debajo de ella.',
-      labelCard: 'Etiqueta a imprimir: {0} × {1} mm en las paredes ±Y, {2} × {3} mm en las ±X, {4} mm de grosor.',
+      labelWidth: 'Ancho {0} (mm)',
+      labelSize: 'Etiqueta a imprimir: {0} × {1} mm, {2} mm de grosor.',
+      labelBaseColour: 'Base de la etiqueta',
+      labelTextColour: 'Texto de la etiqueta',
       labelText: 'Texto {0}',
       labelTextHint: 'ej.: TORNILLOS M3',
       labelSmall: 'A este tamaño los trazos salen más finos que un cordón de material. Acorta el texto o usa una caja mayor.',
@@ -591,7 +604,10 @@
       handlesHint: 'Découpe une fente ovale près du haut du nid d’abeille sur chaque paroi sélectionnée, comme la prise du couvercle.',
       labelsCard: 'Porte-étiquettes',
       labelsHint: 'Un cadre en saillie en haut de chaque paroi choisie, bord inférieur et côtés seulement. L’étiquette se glisse par le dessus. Si la paroi a aussi une prise, le cadre passe en dessous.',
-      labelCard: 'Étiquette à imprimer : {0} × {1} mm sur les parois ±Y, {2} × {3} mm sur les ±X, {4} mm d’épaisseur.',
+      labelWidth: 'Largeur {0} (mm)',
+      labelSize: 'Étiquette à imprimer : {0} × {1} mm, {2} mm d’épaisseur.',
+      labelBaseColour: 'Fond de l’étiquette',
+      labelTextColour: 'Texte de l’étiquette',
       labelText: 'Texte {0}',
       labelTextHint: 'ex. : VIS M3',
       labelSmall: 'À cette taille les traçés sortent plus fins qu’un cordon de matière. Raccourcissez le texte ou prenez une boîte plus grande.',
@@ -672,7 +688,10 @@
       handlesHint: 'Schneidet einen ovalen Schlitz nahe dem oberen Rand der Wabe in jede gewählte Wand, wie den Griff im Deckel.',
       labelsCard: 'Etikettenhalter',
       labelsHint: 'Ein vorstehender Rahmen oben an jeder gewählten Wand, nur unten und an den Seiten. Das Etikett kommt von oben hinein. Hat die Wand auch einen Griff, rückt der Rahmen darunter.',
-      labelCard: 'Etikett zum Ausdrucken: {0} × {1} mm an den ±Y-Wänden, {2} × {3} mm an den ±X, {4} mm dick.',
+      labelWidth: 'Breite {0} (mm)',
+      labelSize: 'Etikett zum Ausdrucken: {0} × {1} mm, {2} mm dick.',
+      labelBaseColour: 'Etikettgrund',
+      labelTextColour: 'Etikettschrift',
       labelText: 'Text {0}',
       labelTextHint: 'z. B. SCHRAUBEN M3',
       labelSmall: 'In dieser Größe werden die Striche dünner als eine Materialbahn. Kürze den Text oder nimm eine größere Box.',
@@ -753,7 +772,10 @@
       handlesHint: 'Apre un’asola ovale vicino alla cima del nido d’ape su ogni parete selezionata, come la presa del coperchio.',
       labelsCard: 'Portaetichette',
       labelsHint: 'Una cornice sporgente in cima a ogni parete scelta, solo bordo inferiore e laterali. L’etichetta scende dall’alto. Se la parete ha anche la presa, la cornice scende sotto di essa.',
-      labelCard: 'Etichetta da stampare: {0} × {1} mm sulle pareti ±Y, {2} × {3} mm su quelle ±X, spessore {4} mm.',
+      labelWidth: 'Larghezza {0} (mm)',
+      labelSize: 'Etichetta da stampare: {0} × {1} mm, spessore {2} mm.',
+      labelBaseColour: 'Fondo dell’etichetta',
+      labelTextColour: 'Testo dell’etichetta',
       labelText: 'Testo {0}',
       labelTextHint: 'es.: VITI M3',
       labelSmall: 'A questa misura i tratti escono più sottili di un cordolo di materiale. Accorcia il testo o usa una scatola più grande.',
@@ -834,7 +856,10 @@
       handlesHint: '在所选侧壁蜂窝靠上的位置开出椭圆形提手孔，形状与盖子的提手一致。',
       labelsCard: '标签夹',
       labelsHint: '在所选侧壁顶部加一圈凸起边框，只有下边和两侧，上方开口，标签从上面插入。若该壁也选了提手，边框会移到提手下方。',
-      labelCard: '需打印的标签：±Y 壁 {0} × {1} mm，±X 壁 {2} × {3} mm，厚 {4} mm。',
+      labelWidth: '{0} 宽度（mm）',
+      labelSize: '需打印的标签：{0} × {1} mm，厚 {2} mm。',
+      labelBaseColour: '标签底色',
+      labelTextColour: '标签文字颜色',
       labelText: '{0} 文字',
       labelTextHint: '例：M3 螺丝',
       labelSmall: '在这个尺寸下，笔画比一条挤出线还细。请缩短文字或换用更大的箱体。',
@@ -915,7 +940,10 @@
       handlesHint: '選択した壁のハニカム上部付近に、ふたの指かけ穴と同じ長円形の取っ手穴を開けます。',
       labelsCard: 'ラベルホルダー',
       labelsHint: '選択した壁の上端に、下辺と両側だけの凸型フレームを付けます。ラベルは上から差し込みます。同じ壁に取っ手もある場合、フレームはその下に下がります。',
-      labelCard: '印刷するラベル：±Y 壁 {0} × {1} mm、±X 壁 {2} × {3} mm、厚さ {4} mm。',
+      labelWidth: '{0} の幅（mm）',
+      labelSize: '印刷するラベル：{0} × {1} mm、厚さ {2} mm。',
+      labelBaseColour: 'ラベルの土台',
+      labelTextColour: 'ラベルの文字',
       labelText: '{0} の文字',
       labelTextHint: '例：M3 ネジ',
       labelSmall: 'この大きさでは線が押し出し幅より細くなります。文字を短くするか、大きな箱を使ってください。',
@@ -1050,6 +1078,9 @@
           handleYP: !!o.handleYP, handleYN: !!o.handleYN,
           labelXP: !!o.labelXP, labelXN: !!o.labelXN,
           labelYP: !!o.labelYP, labelYN: !!o.labelYN,
+          // Asked-for card width per wall. Zero leaves it to the wall.
+          widthXP: Math.max(0, num(o.widthXP, 0)), widthXN: Math.max(0, num(o.widthXN, 0)),
+          widthYP: Math.max(0, num(o.widthYP, 0)), widthYN: Math.max(0, num(o.widthYN, 0)),
           withLid: !!o.withLid,
           lidT: lidT, lidMinT: lidMinT, lidClear: lidClear, lidMaxClear: lidMaxClear,
           lidGrip: !!o.lidGrip, lidHoneycomb: !!o.lidHoneycomb,
@@ -1250,14 +1281,14 @@
         var fit = 0.4;                          // slack so the card slides down
         var room = P.boxZ - (P.floorTop + 2) - rise - sill;
         var winH = Math.min(clamp(P.boxZ * 0.22, 10, 20), room);
-        function reach(half) { return Math.min(half * 0.85, 60) - post; }
+        // The two bottom corners are eased off, on the card and on the opening
+        // it shows through alike. The top stays square: that is the edge the
+        // card is pulled out by, and there is no frame along it to follow.
+        var round = clamp(Math.min(winH * 0.22, (winH - lip) * 0.4), 0.8, 3);
         return {
           card: card, emb: emb, slot: slot, depth: depth, rise: rise,
           sill: sill, lip: lip, post: post, fit: fit,
-          winH: winH,
-          // Holders on the X walls run along y, and the other way round.
-          wx: 2 * reach(P.boxY / 2 - P.cornerR) - fit,
-          wy: 2 * reach(P.boxX / 2 - P.cornerR) - fit,
+          winH: winH, minCard: 2 * 8 - fit, round: round, roundSteps: 8,
           ok: winH >= 6
         };
       }
@@ -1268,13 +1299,21 @@
       function labelSides(P) {
         var L = labelSpec(P), hx = P.boxX / 2, hy = P.boxY / 2, r = P.cornerR;
         return [
-          { k: 'xp', wall: 'XP', o: [1, 0], p: hx, half: hy - r, grip: !!P.handleXP },
-          { k: 'yp', wall: 'YP', o: [0, 1], p: hy, half: hx - r, grip: !!P.handleYP },
-          { k: 'xn', wall: 'XN', o: [-1, 0], p: hx, half: hy - r, grip: !!P.handleXN },
-          { k: 'yn', wall: 'YN', o: [0, -1], p: hy, half: hx - r, grip: !!P.handleYN }
+          { k: 'xp', wall: 'XP', o: [1, 0], p: hx, half: hy - r, grip: !!P.handleXP, want: P.widthXP },
+          { k: 'yp', wall: 'YP', o: [0, 1], p: hy, half: hx - r, grip: !!P.handleYP, want: P.widthYP },
+          { k: 'xn', wall: 'XN', o: [-1, 0], p: hx, half: hy - r, grip: !!P.handleXN, want: P.widthXN },
+          { k: 'yn', wall: 'YN', o: [0, -1], p: hy, half: hx - r, grip: !!P.handleYN, want: P.widthYN }
         ].map(function (sd) {
-          sd.outer = Math.min(sd.half * 0.85, 60);
-          sd.inner = sd.outer - L.post;
+          // How wide a card the wall can carry, and how wide a one it will.
+          // The frame follows the card rather than the other way round, so a
+          // narrower label still has both returns holding its edges.
+          sd.maxCard = 2 * (Math.min(sd.half * 0.85, 60) - L.post) - L.fit;
+          sd.minCard = L.minCard;
+          sd.card = sd.want > 0
+            ? clamp(sd.want, Math.min(L.minCard, sd.maxCard), sd.maxCard)
+            : sd.maxCard;
+          sd.inner = (sd.card + L.fit) / 2;
+          sd.outer = sd.inner + L.post;
           // A wall can carry both. The holder then hangs below the grip
           // instead of level with the mouth, and the card still drops in from
           // above, since the frame stands clear of the skin.
@@ -1317,6 +1356,19 @@
         function profile(zBase, top, back) {
           return [[-L.emb, zBase - L.rise], [L.depth, zBase], [L.depth, top],
                   [L.slot, top], [L.slot, back], [-L.emb, back]];
+        }
+
+        // One station along a rounded bottom corner of the opening. The sill's
+        // lip climbs into the rail along an arc instead of meeting it square,
+        // so only the front of the section moves: the pocket behind keeps its
+        // depth right across and the card still drops straight in. Because the
+        // arc only ever adds lip on top of lip, it needs no support either.
+        function arc(zBase, zL, flat, R, sign, j) {
+          var th = Math.PI * (1 + 0.5 * j / L.roundSteps);
+          return {
+            u: sign * (flat - R * Math.cos(th)),
+            p: profile(zBase, zL + L.lip + R * (1 + Math.sin(th)), zL)
+          };
         }
 
         function at(sd, d, u, z) {
@@ -1363,23 +1415,26 @@
           }
         }
 
-        var made = 0, i, sd, outer, inner, zL, zBase, mid, ret, post;
+        var made = 0, i, j, sd, outer, inner, zL, zBase, ret, post, R, flat, st;
         for (i = 0; i < sides.length; i++) {
           sd = sides[i];
           if (!want[sd.k] || !sd.ok) continue;
           outer = sd.outer;
           inner = sd.inner;
           zL = sd.zLedge; zBase = zL - L.sill;
-          mid = profile(zBase, zL + L.lip, zL);   // bottom border, open above
           ret = profile(zBase, sd.zTop, zL);      // return, gripping the edge
           post = profile(zBase, sd.zTop, sd.zTop); // post, solid to the top
-          sweepVar(sd, [
-            { u: -outer, p: post }, { u: -inner, p: post },
-            { u: -inner, p: ret }, { u: -(inner - L.lip), p: ret },
-            { u: -(inner - L.lip), p: mid }, { u: inner - L.lip, p: mid },
-            { u: inner - L.lip, p: ret }, { u: inner, p: ret },
-            { u: inner, p: post }, { u: outer, p: post }
-          ]);
+
+          R = Math.min(L.round, (inner - L.lip) * 0.8);
+          flat = inner - L.lip - R;
+
+          st = [{ u: -outer, p: post }, { u: -inner, p: post },
+                { u: -inner, p: ret }, { u: -(inner - L.lip), p: ret }];
+          for (j = 0; j <= L.roundSteps; j++) st.push(arc(zBase, zL, flat, R, -1, j));
+          for (j = L.roundSteps; j >= 0; j--) st.push(arc(zBase, zL, flat, R, 1, j));
+          st.push({ u: inner - L.lip, p: ret }, { u: inner, p: ret },
+                  { u: inner, p: post }, { u: outer, p: post });
+          sweepVar(sd, st);
           made++;
         }
         return made;
@@ -1562,21 +1617,43 @@
         var sd = labelSides(P).filter(function (x) { return x.wall === wall; })[0];
         if (!sd || !sd.ok) return null;
 
-        var w = 2 * sd.inner - L.fit, hgt = L.winH, s = soup();
+        var w = sd.card, hgt = L.winH, s = soup();
         var x0 = -w / 2, x1 = w / 2, y0 = -hgt / 2, y1 = hgt / 2, z1 = L.card;
+        // The card follows the opening: square along the top, where it is
+        // gripped and pulled out, rounded at the two bottom corners.
+        var R = Math.min(L.round, hgt * 0.45, w * 0.45), N = L.roundSteps, a, th;
+        var out = [[x0 + R, y0], [x1 - R, y0]];
+        for (a = 1; a <= N; a++) {
+          th = Math.PI * (1.5 + 0.5 * a / N);
+          out.push([x1 - R + R * Math.cos(th), y0 + R + R * Math.sin(th)]);
+        }
+        out.push([x1, y1], [x0, y1]);
+        for (a = 0; a < N; a++) {
+          th = Math.PI * (1 + 0.5 * a / N);
+          out.push([x0 + R + R * Math.cos(th), y0 + R + R * Math.sin(th)]);
+        }
+        var M = out.length;
         function p(x, y, z) { return [x, y, z]; }
-        s.quad(p(x0, y0, 0), p(x0, y1, 0), p(x1, y1, 0), p(x1, y0, 0));
-        s.quad(p(x0, y0, z1), p(x1, y0, z1), p(x1, y1, z1), p(x0, y1, z1));
-        s.quad(p(x0, y0, 0), p(x1, y0, 0), p(x1, y0, z1), p(x0, y0, z1));
-        s.quad(p(x1, y0, 0), p(x1, y1, 0), p(x1, y1, z1), p(x1, y0, z1));
-        s.quad(p(x1, y1, 0), p(x0, y1, 0), p(x0, y1, z1), p(x1, y1, z1));
-        s.quad(p(x0, y1, 0), p(x0, y0, 0), p(x0, y0, z1), p(x0, y1, z1));
+        for (i = 1; i + 1 < M; i++) {
+          s.tri(p(out[0][0], out[0][1], z1), p(out[i][0], out[i][1], z1),
+                p(out[i + 1][0], out[i + 1][1], z1));
+          s.tri(p(out[0][0], out[0][1], 0), p(out[i + 1][0], out[i + 1][1], 0),
+                p(out[i][0], out[i][1], 0));
+        }
+        for (i = 0; i < M; i++) {
+          var b = out[(i + 1) % M];
+          s.quad(p(out[i][0], out[i][1], 0), p(b[0], b[1], 0),
+                 p(b[0], b[1], z1), p(out[i][0], out[i][1], z1));
+        }
 
         // Only the part the frame leaves uncovered is worth writing on, and
         // the text grows until it just fits that, whatever the box's size.
         var pad = clamp(Math.min(w, hgt) * 0.09, 0.8, 2.2);
         var winW = 2 * (sd.inner - L.lip) - 2 * pad;
         var winH = hgt - L.lip - 2 * pad;
+        // The plate ends here, so the preview can paint the letters on their
+        // own without the two ever parting company in the file.
+        var base = s.done().length;
         var size = 0, groups = [];
         var str = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
         if (font && str && winW > 2 && winH > 2) {
@@ -1606,7 +1683,7 @@
           }
         }
         return {
-          v: s.done(), w: w, h: hgt, thick: L.card, raise: 1,
+          v: s.done(), base: base, w: w, h: hgt, thick: L.card, raise: 1,
           size: size, letters: groups.length, text: str
         };
       }
@@ -2554,6 +2631,15 @@
       return fontState;
     }
 
+    // Black or white, whichever stands off the colour given. Rec. 709 luma,
+    // because the eye reads green as far brighter than blue.
+    function contrast(hex) {
+      var n = parseInt(String(hex).replace('#', ''), 16);
+      if (isNaN(n)) return '#000000';
+      var y = 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
+      return y > 140 ? '#000000' : '#ffffff';
+    }
+
     // The same colour knocked back, so a card reads against the shell.
     function shade(hex, k) {
       var n = parseInt(String(hex).replace('#', ''), 16);
@@ -2848,6 +2934,7 @@
         handleXP: false, handleXN: false, handleYP: false, handleYN: false,
         labelXP: false, labelXN: false, labelYP: false, labelYN: false,
         textXP: '', textXN: '', textYP: '', textYN: '',
+        widthXP: 0, widthXN: 0, widthYP: 0, widthYN: 0,
         withLid: false, lidT: 4, lidClear: 0.3,
         lidGrip: false, lidHoneycomb: false
       });
@@ -2856,6 +2943,13 @@
 
       var stColor = React.useState('#5b6470'); var colour = stColor[0], setColour = stColor[1];
       var stView = React.useState('box'); var view = stView[0], setView = stView[1];
+      // Left alone, a card sits a fifth darker than the box and its letters
+      // take whichever of black or white stands off that. Once either picker
+      // is touched it holds, and stops following the box colour.
+      var stCard = React.useState(null); var cardSet = stCard[0], setCardSet = stCard[1];
+      var stInk = React.useState(null); var inkSet = stInk[0], setInkSet = stInk[1];
+      var cardColour = cardSet || shade(colour, 0.8);
+      var inkColour = inkSet || contrast(cardColour);
 
       var P = React.useMemo(function () { return BE.compute(o); }, [o]);
       var model = React.useMemo(function () {
@@ -2865,15 +2959,17 @@
         return P.valid && P.withLid ? BE.buildLid(P) : null;
       }, [P]);
       var label = React.useMemo(function () { return BE.labelSpec(P); }, [P]);
+      var sides = React.useMemo(function () {
+        return P.valid ? BE.labelSides(P) : [];
+      }, [P]);
+      function sideOf(w) {
+        return sides.filter(function (x) { return x.wall === w; })[0];
+      }
       // Walls asked for a holder that the grip above it has squeezed out.
-      var cramped = React.useMemo(function () {
-        if (!P.valid || !label.ok) return [];
-        var sides = BE.labelSides(P);
-        return WALLS.filter(function (w) {
-          var sd = sides.filter(function (x) { return x.wall === w; })[0];
-          return o['label' + w] && sd && sd.grip && !sd.room;
-        }).map(function (w) { return WALL_AXIS[w]; });
-      }, [P, label, o.labelYP, o.labelYN, o.labelXN, o.labelXP]);
+      var cramped = label.ok ? WALLS.filter(function (w) {
+        var sd = sideOf(w);
+        return o['label' + w] && sd && sd.grip && !sd.room;
+      }).map(function (w) { return WALL_AXIS[w]; }) : [];
 
       // A card for every holder that has something written on it. A blank one
       // is nothing worth printing, so it stays out of the preview too.
@@ -2931,13 +3027,18 @@
         if (showBox && model) {
           meshRef.current = toPreviewMesh(model.v, colour, -P.boxZ * k / 2);
           stg.scene.add(meshRef.current);
-          // The cards ride with the box, seated in the holders they belong to,
-          // a shade darker so the writing reads against the shell.
+          // The cards ride with the box, seated in the holders they belong to.
+          // Plate and letters go up as two meshes so each takes its own
+          // colour, the way a two-material print would come out.
           plates.forEach(function (pl) {
-            var m = toPreviewMesh(BE.placeLabel(pl.part.v, P, pl.wall),
-              shade(colour, 0.82), -P.boxZ * k / 2);
-            cardRef.current.push(m);
-            stg.scene.add(m);
+            var v = BE.placeLabel(pl.part.v, P, pl.wall), n = pl.part.base;
+            [[v.subarray(0, n), cardColour], [v.subarray(n), inkColour]]
+              .forEach(function (part) {
+                if (!part[0].length) return;
+                var m = toPreviewMesh(part[0], part[1], -P.boxZ * k / 2);
+                cardRef.current.push(m);
+                stg.scene.add(m);
+              });
           });
         }
         if (showLid) {
@@ -2950,7 +3051,8 @@
           stg.scene.add(lidRef.current);
         }
         stage.request();
-      }, [model, lidModel, plates, colour, view, P.boxZ, P.baseChamfer, P.lidClear, P.lidT]);
+      }, [model, lidModel, plates, colour, cardColour, inkColour, view,
+          P.boxZ, P.baseChamfer, P.lidClear, P.lidT]);
 
       // Frame the piece: enough distance that the longest side always fits.
       React.useEffect(function () {
@@ -3097,26 +3199,54 @@
                 // Below about 4 mm of body the strokes come out thinner than a
                 // single bead and the letters print ragged.
                 var made = plates.filter(function (pl) { return pl.wall === w; })[0];
-                return h(Field, {
-                  key: w, label: t('labelText', WALL_AXIS[w]),
-                  hint: made && made.part.size > 0 && made.part.size < 4 ? t('labelSmall') : null
-                },
-                  h(TextInput, {
-                    value: o['text' + w], label: t('labelText', WALL_AXIS[w]),
-                    placeholder: t('labelTextHint'),
-                    onChange: function (v) { set('text' + w, v); }
-                  })
+                var sd = sideOf(w);
+                return h(React.Fragment, { key: w },
+                  h(Field, {
+                    label: t('labelText', WALL_AXIS[w]),
+                    hint: made && made.part.size > 0 && made.part.size < 4 ? t('labelSmall') : null
+                  },
+                    h(TextInput, {
+                      value: o['text' + w], label: t('labelText', WALL_AXIS[w]),
+                      placeholder: t('labelTextHint'),
+                      onChange: function (v) { set('text' + w, v); }
+                    })
+                  ),
+                  sd ? h(Field, {
+                    label: t('labelWidth', WALL_AXIS[w]),
+                    hint: t('labelSize', n1(sd.card), n1(label.winH), n1(label.card))
+                  },
+                    h(NumberInput, {
+                      value: o['width' + w] || n1(sd.card),
+                      min: n1(Math.min(sd.minCard, sd.maxCard)), max: n1(sd.maxCard), step: 0.5,
+                      onChange: function (v) { set('width' + w, v); }
+                    })
+                  ) : null
                 );
               }),
               cramped.length
                 ? h('div', { className: 'alert warn' }, t('labelNoRoom', cramped.join(', ')))
                 : null,
-              WALLS.some(function (w) { return o['label' + w]; })
-                ? h('div', { className: 'hint' }, t('labelPrintHint')) : null,
               font.failed ? h('div', { className: 'alert warn' }, t('labelFontOff')) : null,
-              label.ok ? h('div', { className: 'hint', style: { marginTop: '6px' } },
-                t('labelCard', n1(label.wy), n1(label.winH), n1(label.wx), n1(label.winH),
-                  n1(label.card))) : null,
+              WALLS.some(function (w) { return o['label' + w]; })
+                ? h(React.Fragment, null,
+                  h('div', { className: 'swatches' },
+                    h('div', { className: 'swatch' },
+                      h('input', {
+                        type: 'color', value: cardColour, 'aria-label': t('labelBaseColour'),
+                        onChange: function (e) { setCardSet(e.target.value); }
+                      }),
+                      h('label', null, t('labelBaseColour'))
+                    ),
+                    h('div', { className: 'swatch' },
+                      h('input', {
+                        type: 'color', value: inkColour, 'aria-label': t('labelTextColour'),
+                        onChange: function (e) { setInkSet(e.target.value); }
+                      }),
+                      h('label', null, t('labelTextColour'))
+                    )
+                  ),
+                  h('div', { className: 'hint' }, t('labelPrintHint'))
+                ) : null,
               h('div', { className: 'hint' }, t('labelsHint'))
             ),
 

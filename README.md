@@ -29,11 +29,13 @@ mais favos, todos do mesmo tamanho.
   entra por cima e fica à vista, presa pela soleira e pelos retornos das duas
   calhas — os três encaixes agarram 2,5 mm cada, para a moldura fechar por
   igual. A bolsa tem 2,4 mm, para uma etiqueta impressa de 2 mm. A soleira
-  leva um chanfre a 45° por baixo, por isso imprime sem suportes. O painel
-  indica o tamanho da etiqueta a imprimir para cada parede. A mesma parede pode
-  levar pega e porta-etiquetas: nesse caso a moldura desce para debaixo da
-  pega. Se a caixa for baixa de mais para as duas coisas, a app diz quais as
-  paredes onde não cabem
+  leva um chanfre a 45° por baixo, por isso imprime sem suportes. Os dois
+  cantos de baixo da abertura são arredondados — a soleira sobe para as calhas
+  em arco — e o cartão faz a mesma curva; em cima ficam a direito, que é por
+  onde a etiqueta entra e se puxa. A mesma parede pode levar pega e
+  porta-etiquetas: nesse caso a moldura desce para debaixo da pega. Se a caixa
+  for baixa de mais para as duas coisas, a app diz quais as paredes onde não
+  cabem
 - **Etiquetas escritas** — cada porta-etiquetas ligado abre um campo de texto.
   O que escreveres vira uma placa à parte: 2 mm de base e 1 mm de letra em
   relevo, na Exo, com o corpo a crescer até encher a janela da moldura. A placa
@@ -41,6 +43,16 @@ mais favos, todos do mesmo tamanho.
   texto para cima, que é como tem de ser impressa. Se a caixa for pequena para
   o texto que escreveste, a app avisa antes de as letras ficarem mais finas do
   que um cordão de material
+- **Largura da etiqueta** — por baixo do texto podes dar a cada parede a
+  largura que quiseres, em milímetros. A moldura acompanha a etiqueta, para
+  esta não abanar lá dentro, e o campo diz sempre o tamanho que vai sair. Deixa
+  o campo vazio e a etiqueta volta a ocupar a parede toda; pedir mais do que a
+  parede aguenta ou menos do que a moldura fecha fica pelo limite
+- **Cores da etiqueta** — a base começa 20% mais escura do que a caixa e a
+  letra fica preta ou branca, conforme a que se destaca da base: uma caixa
+  branca dá letra preta e uma caixa preta dá letra branca. Os dois seletores
+  deixam-te escolher outra coisa, e aí a cor fica onde a puseste. Só conta para
+  a pré-visualização — o STL não leva cor
 - **Tampa** — peça sólida que usa o mesmo encaixe das caixas: por baixo leva o
   pé chanfrado da caixa, por cima leva o rebaixo da boca. Assenta na caixa como
   uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa
@@ -53,7 +65,7 @@ mais favos, todos do mesmo tamanho.
 
 1. Abre `index.html` no browser
 2. Ajusta medidas, grelha, pegas, porta-etiquetas e tampa
-3. Escreve o texto das etiquetas que quiseres
+3. Escreve o texto das etiquetas que quiseres, e dá-lhes largura e cor
 4. Vê as peças em 3D e descarrega os STL
 
 A interface está em inglês, português, espanhol, francês, alemão, italiano,
