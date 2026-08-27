@@ -20,6 +20,12 @@
   <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
   <script src="https://unpkg.com/earcut@2.2.4/dist/earcut.min.js"></script>
 
+  <!-- Glyph outlines for the label text. The stylesheet above only gets us Exo
+       on screen; cutting it in plastic needs the curves themselves, and the
+       static SemiBold rather than the variable file, whose default weight is
+       Thin and would come out too fine to print. -->
+  <script src="https://unpkg.com/opentype.js@1.3.4/dist/opentype.min.js"></script>
+
   <style>
     /* -------------------------------------------------------------
        Same tokens as the string-art studio next door: one neutral
@@ -139,14 +145,16 @@
     .field { margin-bottom:16px; }
     .field:last-child { margin-bottom:0; }
     label { display:block; font-size:12.5px; margin-bottom:7px; color:var(--ink-2); font-weight:600; }
-    input[type="number"], .select-button {
+    input[type="number"], input[type="text"], .select-button {
       width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:var(--r);
       font-family:inherit; font-size:14px; font-weight:400; background:var(--surface); color:var(--ink);
       transition:border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
     }
     input[type="number"] { font-variant-numeric:tabular-nums; }
-    input[type="number"]:hover, .select-button:hover { border-color:#bcc3ce; }
-    input[type="number"]:focus, .select-button:focus-visible {
+    input[type="text"] { -webkit-appearance:none; appearance:none; }
+    input[type="text"]::placeholder { color:var(--muted); }
+    input[type="number"]:hover, input[type="text"]:hover, .select-button:hover { border-color:#bcc3ce; }
+    input[type="number"]:focus, input[type="text"]:focus, .select-button:focus-visible {
       outline:none; border-color:var(--ink); box-shadow:var(--ring);
     }
     .select-wrapper { position:relative; }
@@ -339,8 +347,14 @@
       handlesCard: 'Pegas nas paredes',
       handlesHint: 'Abre uma ranhura oval perto do topo da colmeia em cada parede seleccionada, igual à pega da tampa.',
       labelsCard: 'Porta-etiquetas',
-      labelsHint: 'Moldura saliente no topo de cada parede escolhida, só com borda inferior e laterais. A etiqueta entra por cima. Uma parede leva pega ou porta-etiquetas, não os dois.',
+      labelsHint: 'Moldura saliente no topo de cada parede escolhida, só com borda inferior e laterais. A etiqueta entra por cima. Se a parede também levar pega, a moldura desce para debaixo dela.',
       labelCard: 'Etiqueta a imprimir: {0} × {1} mm nas paredes ±Y, {2} × {3} mm nas ±X, {4} mm de espessura.',
+      labelText: 'Texto {0}',
+      labelTextHint: 'ex.: PARAFUSOS M3',
+      labelSmall: 'A esta dimensão o texto sai mais fino do que um cordão de material. Encurta-o ou usa uma caixa maior.',
+      labelNoRoom: 'Não há altura para o porta-etiquetas por baixo da pega nas paredes {0}. Desliga a pega ou usa uma caixa mais alta.',
+      labelPrintHint: 'Cada etiqueta sai num STL à parte, deitada e com o texto para cima: 2 mm de base e 1 mm de letra em Exo, ajustada à janela.',
+      labelFontOff: 'Não foi possível carregar a fonte Exo, por isso as etiquetas saem sem texto. Verifica a ligação à internet.',
       wallXP: 'Parede +X (direita)',
       wallXN: 'Parede −X (esquerda)',
       wallYP: 'Parede +Y (frente)',
@@ -357,6 +371,7 @@
       viewBoth: 'Ambas',
       downloadLid: 'Descarregar STL da tampa',
       downloadBoth: 'Descarregar os dois STL',
+      downloadMany: 'Descarregar {0} STL',
 
       download: 'Descarregar STL',
 
@@ -413,8 +428,14 @@
       handlesCard: 'Wall handles',
       handlesHint: 'Cut an oval slot near the top of the honeycomb on each selected wall, the same shape as the lid grip.',
       labelsCard: 'Label holders',
-      labelsHint: 'A raised frame at the top of each wall you pick, bottom and sides only. The label drops in from above. A wall takes a grip or a label holder, not both.',
+      labelsHint: 'A raised frame at the top of each wall you pick, bottom and sides only. The label drops in from above. If the wall also has a grip, the frame sits below it.',
       labelCard: 'Label to print: {0} × {1} mm on the ±Y walls, {2} × {3} mm on the ±X, {4} mm thick.',
+      labelText: '{0} text',
+      labelTextHint: 'e.g. M3 SCREWS',
+      labelSmall: 'At this size the strokes come out thinner than a single bead. Shorten the text or use a bigger box.',
+      labelNoRoom: 'There is no room for the label holder below the grip on the {0} walls. Turn the grip off or use a taller box.',
+      labelPrintHint: 'Each label comes out as its own STL, lying flat with the text upwards: a 2 mm base and 1 mm of Exo lettering, sized to the opening.',
+      labelFontOff: 'The Exo font could not be loaded, so labels come out blank. Check your connection.',
       wallXP: '+X wall (right)',
       wallXN: '−X wall (left)',
       wallYP: '+Y wall (front)',
@@ -431,6 +452,7 @@
       viewBoth: 'Both',
       downloadLid: 'Download lid STL',
       downloadBoth: 'Download both STLs',
+      downloadMany: 'Download {0} STLs',
 
       download: 'Download STL',
 
@@ -487,8 +509,14 @@
       handlesCard: 'Asas en las paredes',
       handlesHint: 'Abre una ranura ovalada cerca de la parte superior del panal en cada pared seleccionada, igual que el asa de la tapa.',
       labelsCard: 'Portaetiquetas',
-      labelsHint: 'Marco saliente en lo alto de cada pared elegida, sólo con borde inferior y laterales. La etiqueta entra por arriba. Cada pared lleva asa o portaetiquetas, no ambos.',
+      labelsHint: 'Marco saliente en lo alto de cada pared elegida, sólo con borde inferior y laterales. La etiqueta entra por arriba. Si la pared también lleva asa, el marco baja debajo de ella.',
       labelCard: 'Etiqueta a imprimir: {0} × {1} mm en las paredes ±Y, {2} × {3} mm en las ±X, {4} mm de grosor.',
+      labelText: 'Texto {0}',
+      labelTextHint: 'ej.: TORNILLOS M3',
+      labelSmall: 'A este tamaño los trazos salen más finos que un cordón de material. Acorta el texto o usa una caja mayor.',
+      labelNoRoom: 'No hay altura para el portaetiquetas debajo del asa en las paredes {0}. Quita el asa o usa una caja más alta.',
+      labelPrintHint: 'Cada etiqueta sale en un STL aparte, tumbada y con el texto hacia arriba: 2 mm de base y 1 mm de letra en Exo, ajustada a la ventana.',
+      labelFontOff: 'No se pudo cargar la fuente Exo, así que las etiquetas salen sin texto. Comprueba la conexión.',
       wallXP: 'Pared +X (derecha)',
       wallXN: 'Pared −X (izquierda)',
       wallYP: 'Pared +Y (frente)',
@@ -505,6 +533,7 @@
       viewBoth: 'Ambas',
       downloadLid: 'Descargar STL de la tapa',
       downloadBoth: 'Descargar los dos STL',
+      downloadMany: 'Descargar {0} STL',
 
       download: 'Descargar STL',
 
@@ -561,8 +590,14 @@
       handlesCard: 'Poignées murales',
       handlesHint: 'Découpe une fente ovale près du haut du nid d’abeille sur chaque paroi sélectionnée, comme la prise du couvercle.',
       labelsCard: 'Porte-étiquettes',
-      labelsHint: 'Un cadre en saillie en haut de chaque paroi choisie, bord inférieur et côtés seulement. L’étiquette se glisse par le dessus. Une paroi prend une prise ou un porte-étiquettes, pas les deux.',
+      labelsHint: 'Un cadre en saillie en haut de chaque paroi choisie, bord inférieur et côtés seulement. L’étiquette se glisse par le dessus. Si la paroi a aussi une prise, le cadre passe en dessous.',
       labelCard: 'Étiquette à imprimer : {0} × {1} mm sur les parois ±Y, {2} × {3} mm sur les ±X, {4} mm d’épaisseur.',
+      labelText: 'Texte {0}',
+      labelTextHint: 'ex. : VIS M3',
+      labelSmall: 'À cette taille les traçés sortent plus fins qu’un cordon de matière. Raccourcissez le texte ou prenez une boîte plus grande.',
+      labelNoRoom: 'Il n’y a pas la hauteur pour le porte-étiquettes sous la prise sur les parois {0}. Désactivez la prise ou prenez une boîte plus haute.',
+      labelPrintHint: 'Chaque étiquette sort dans son propre STL, à plat et texte vers le haut : 2 mm de base et 1 mm de lettrage Exo, ajusté à l’ouverture.',
+      labelFontOff: 'La police Exo n’a pas pu être chargée, les étiquettes sortent donc sans texte. Vérifiez la connexion.',
       wallXP: 'Paroi +X (droite)',
       wallXN: 'Paroi −X (gauche)',
       wallYP: 'Paroi +Y (avant)',
@@ -579,6 +614,7 @@
       viewBoth: 'Les deux',
       downloadLid: 'Télécharger le STL du couvercle',
       downloadBoth: 'Télécharger les deux STL',
+      downloadMany: 'Télécharger {0} STL',
 
       download: 'Télécharger STL',
 
@@ -635,8 +671,14 @@
       handlesCard: 'Wandgriffe',
       handlesHint: 'Schneidet einen ovalen Schlitz nahe dem oberen Rand der Wabe in jede gewählte Wand, wie den Griff im Deckel.',
       labelsCard: 'Etikettenhalter',
-      labelsHint: 'Ein vorstehender Rahmen oben an jeder gewählten Wand, nur unten und an den Seiten. Das Etikett kommt von oben hinein. Eine Wand bekommt Griff oder Etikettenhalter, nicht beides.',
+      labelsHint: 'Ein vorstehender Rahmen oben an jeder gewählten Wand, nur unten und an den Seiten. Das Etikett kommt von oben hinein. Hat die Wand auch einen Griff, rückt der Rahmen darunter.',
       labelCard: 'Etikett zum Ausdrucken: {0} × {1} mm an den ±Y-Wänden, {2} × {3} mm an den ±X, {4} mm dick.',
+      labelText: 'Text {0}',
+      labelTextHint: 'z. B. SCHRAUBEN M3',
+      labelSmall: 'In dieser Größe werden die Striche dünner als eine Materialbahn. Kürze den Text oder nimm eine größere Box.',
+      labelNoRoom: 'Unter dem Griff ist an den Wänden {0} kein Platz für den Etikettenhalter. Schalte den Griff ab oder nimm eine höhere Box.',
+      labelPrintHint: 'Jedes Etikett kommt als eigene STL, flach liegend mit der Schrift nach oben: 2 mm Grundplatte und 1 mm Exo-Schrift, auf das Fenster eingepasst.',
+      labelFontOff: 'Die Schrift Exo konnte nicht geladen werden, deshalb bleiben die Etiketten leer. Prüfe die Verbindung.',
       wallXP: 'Wand +X (rechts)',
       wallXN: 'Wand −X (links)',
       wallYP: 'Wand +Y (vorne)',
@@ -653,6 +695,7 @@
       viewBoth: 'Beides',
       downloadLid: 'Deckel-STL herunterladen',
       downloadBoth: 'Beide STL herunterladen',
+      downloadMany: '{0} STL herunterladen',
 
       download: 'STL herunterladen',
 
@@ -709,8 +752,14 @@
       handlesCard: 'Maniglie sulle pareti',
       handlesHint: 'Apre un’asola ovale vicino alla cima del nido d’ape su ogni parete selezionata, come la presa del coperchio.',
       labelsCard: 'Portaetichette',
-      labelsHint: 'Una cornice sporgente in cima a ogni parete scelta, solo bordo inferiore e laterali. L’etichetta scende dall’alto. Una parete prende la presa o il portaetichette, non entrambi.',
+      labelsHint: 'Una cornice sporgente in cima a ogni parete scelta, solo bordo inferiore e laterali. L’etichetta scende dall’alto. Se la parete ha anche la presa, la cornice scende sotto di essa.',
       labelCard: 'Etichetta da stampare: {0} × {1} mm sulle pareti ±Y, {2} × {3} mm su quelle ±X, spessore {4} mm.',
+      labelText: 'Testo {0}',
+      labelTextHint: 'es.: VITI M3',
+      labelSmall: 'A questa misura i tratti escono più sottili di un cordolo di materiale. Accorcia il testo o usa una scatola più grande.',
+      labelNoRoom: 'Sotto la presa non c’è altezza per il portaetichette sulle pareti {0}. Disattiva la presa o usa una scatola più alta.',
+      labelPrintHint: 'Ogni etichetta esce in uno STL a parte, distesa e con il testo verso l’alto: 2 mm di base e 1 mm di lettering Exo, adattato alla finestra.',
+      labelFontOff: 'Non è stato possibile caricare il font Exo, quindi le etichette escono vuote. Controlla la connessione.',
       wallXP: 'Parete +X (destra)',
       wallXN: 'Parete −X (sinistra)',
       wallYP: 'Parete +Y (fronte)',
@@ -727,6 +776,7 @@
       viewBoth: 'Entrambi',
       downloadLid: 'Scarica STL del coperchio',
       downloadBoth: 'Scarica entrambi gli STL',
+      downloadMany: 'Scarica {0} STL',
 
       download: 'Scarica STL',
 
@@ -783,8 +833,14 @@
       handlesCard: '侧壁提手',
       handlesHint: '在所选侧壁蜂窝靠上的位置开出椭圆形提手孔，形状与盖子的提手一致。',
       labelsCard: '标签夹',
-      labelsHint: '在所选侧壁顶部加一圈凸起边框，只有下边和两侧，上方开口，标签从上面插入。同一面墙只能选提手或标签夹。',
+      labelsHint: '在所选侧壁顶部加一圈凸起边框，只有下边和两侧，上方开口，标签从上面插入。若该壁也选了提手，边框会移到提手下方。',
       labelCard: '需打印的标签：±Y 壁 {0} × {1} mm，±X 壁 {2} × {3} mm，厚 {4} mm。',
+      labelText: '{0} 文字',
+      labelTextHint: '例：M3 螺丝',
+      labelSmall: '在这个尺寸下，笔画比一条挤出线还细。请缩短文字或换用更大的箱体。',
+      labelNoRoom: '{0} 壁上提手下方的高度不够放标签夹。请关闭提手或换用更高的箱体。',
+      labelPrintHint: '每张标签导出为单独的 STL，平放且文字朝上：2 mm 底板加 1 mm 的 Exo 字体，自动适应窗口大小。',
+      labelFontOff: '无法加载 Exo 字体，标签将不带文字。请检查网络连接。',
       wallXP: '+X 壁（右）',
       wallXN: '−X 壁（左）',
       wallYP: '+Y 壁（前）',
@@ -801,6 +857,7 @@
       viewBoth: '两者',
       downloadLid: '下载盖子 STL',
       downloadBoth: '下载两个 STL',
+      downloadMany: '下载 {0} 个 STL',
 
       download: '下载 STL',
 
@@ -857,8 +914,14 @@
       handlesCard: '壁の取っ手',
       handlesHint: '選択した壁のハニカム上部付近に、ふたの指かけ穴と同じ長円形の取っ手穴を開けます。',
       labelsCard: 'ラベルホルダー',
-      labelsHint: '選択した壁の上端に、下辺と両側だけの凸型フレームを付けます。ラベルは上から差し込みます。1つの壁に取っ手とラベルホルダーは併用できません。',
+      labelsHint: '選択した壁の上端に、下辺と両側だけの凸型フレームを付けます。ラベルは上から差し込みます。同じ壁に取っ手もある場合、フレームはその下に下がります。',
       labelCard: '印刷するラベル：±Y 壁 {0} × {1} mm、±X 壁 {2} × {3} mm、厚さ {4} mm。',
+      labelText: '{0} の文字',
+      labelTextHint: '例：M3 ネジ',
+      labelSmall: 'この大きさでは線が押し出し幅より細くなります。文字を短くするか、大きな箱を使ってください。',
+      labelNoRoom: '{0} 壁では取っ手の下にラベルホルダーを置く高さがありません。取っ手を外すか、背の高い箱を使ってください。',
+      labelPrintHint: 'ラベルは1枚ずつ別の STL として出力され、文字を上にして平置きになります。土台 2 mm、Exo の文字 1 mm で、窓の大きさに合わせて調整されます。',
+      labelFontOff: 'Exo フォントを読み込めなかったため、ラベルは文字なしで出力されます。接続を確認してください。',
       wallXP: '+X 壁（右）',
       wallXN: '−X 壁（左）',
       wallYP: '+Y 壁（前）',
@@ -875,6 +938,7 @@
       viewBoth: '両方',
       downloadLid: 'ふたの STL をダウンロード',
       downloadBoth: '両方の STL をダウンロード',
+      downloadMany: 'STL を {0} 件ダウンロード',
 
       download: 'STL をダウンロード',
 
@@ -1183,18 +1247,50 @@
         // One reach for all three returns, so the sill and the two rails grip
         // the card by exactly the same amount.
         var sill = 2.5, lip = 2.5, post = 2;
+        var fit = 0.4;                          // slack so the card slides down
         var room = P.boxZ - (P.floorTop + 2) - rise - sill;
         var winH = Math.min(clamp(P.boxZ * 0.22, 10, 20), room);
         function reach(half) { return Math.min(half * 0.85, 60) - post; }
         return {
           card: card, emb: emb, slot: slot, depth: depth, rise: rise,
-          sill: sill, lip: lip, post: post,
-          winH: winH, zTop: P.boxZ, zLedge: P.boxZ - winH,
+          sill: sill, lip: lip, post: post, fit: fit,
+          winH: winH,
           // Holders on the X walls run along y, and the other way round.
-          wx: 2 * reach(P.boxY / 2 - P.cornerR),
-          wy: 2 * reach(P.boxX / 2 - P.cornerR),
+          wx: 2 * reach(P.boxY / 2 - P.cornerR) - fit,
+          wy: 2 * reach(P.boxX / 2 - P.cornerR) - fit,
           ok: winH >= 6
         };
+      }
+
+      // The four walls a holder can stand on: outward normal, how far out the
+      // skin is, and how far the frame runs each way from the middle. The
+      // frame and the card that drops into it both read their size off this.
+      function labelSides(P) {
+        var L = labelSpec(P), hx = P.boxX / 2, hy = P.boxY / 2, r = P.cornerR;
+        return [
+          { k: 'xp', wall: 'XP', o: [1, 0], p: hx, half: hy - r, grip: !!P.handleXP },
+          { k: 'yp', wall: 'YP', o: [0, 1], p: hy, half: hx - r, grip: !!P.handleYP },
+          { k: 'xn', wall: 'XN', o: [-1, 0], p: hx, half: hy - r, grip: !!P.handleXN },
+          { k: 'yn', wall: 'YN', o: [0, -1], p: hy, half: hx - r, grip: !!P.handleYN }
+        ].map(function (sd) {
+          sd.outer = Math.min(sd.half * 0.85, 60);
+          sd.inner = sd.outer - L.post;
+          // A wall can carry both. The holder then hangs below the grip
+          // instead of level with the mouth, and the card still drops in from
+          // above, since the frame stands clear of the skin.
+          sd.zTop = sd.grip ? gripFloor(P) - 2 : P.boxZ;
+          sd.zLedge = sd.zTop - L.winH;
+          sd.room = sd.zLedge - L.sill - L.rise >= P.floorTop + 2;
+          sd.ok = L.ok && sd.inner >= 8 && sd.room;
+          return sd;
+        });
+      }
+
+      // How low a grip opening reaches, measured at its deepest. The slot
+      // shrinks where a wall is short, so taking the widest case here means a
+      // holder tucked underneath never has to know the run it sits on.
+      function gripFloor(P) {
+        return P.rimBottom - 1.5 - 2 * Math.min(gripWidth(P) / 2, (P.band - 4) / 2);
       }
 
       // A label holder on each wall asked for, standing on the outer skin: a
@@ -1211,22 +1307,14 @@
         var L = labelSpec(P);
         if (!L.ok) return 0;
 
-        var hx = P.boxX / 2, hy = P.boxY / 2, r = P.cornerR;
-        // Outward normal, distance to the wall, half the straight run.
-        var sides = [
-          { k: 'xp', o: [1, 0], p: hx, half: hy - r },
-          { k: 'yp', o: [0, 1], p: hy, half: hx - r },
-          { k: 'xn', o: [-1, 0], p: hx, half: hy - r },
-          { k: 'yn', o: [0, -1], p: hy, half: hx - r }
-        ];
+        var sides = labelSides(P);
 
-        var zL = L.zLedge, zBase = zL - L.sill;
         // Section across the frame, (outwards, up), counter-clockwise seen from
         // the far end of the run. The chamfer tops out where the shelf starts.
         // `top` is how high the front wall runs and `back` how high the pocket
         // behind it stays open, which is all that tells the bottom border, the
         // returns and the posts apart.
-        function profile(top, back) {
+        function profile(zBase, top, back) {
           return [[-L.emb, zBase - L.rise], [L.depth, zBase], [L.depth, top],
                   [L.slot, top], [L.slot, back], [-L.emb, back]];
         }
@@ -1275,16 +1363,16 @@
           }
         }
 
-        var made = 0, i, sd, outer, inner, mid, ret, post;
+        var made = 0, i, sd, outer, inner, zL, zBase, mid, ret, post;
         for (i = 0; i < sides.length; i++) {
           sd = sides[i];
-          if (!want[sd.k]) continue;
-          outer = Math.min(sd.half * 0.85, 60);
-          inner = outer - L.post;
-          if (inner < 8) continue;
-          mid = profile(zL + L.lip, zL);   // bottom border, open above it
-          ret = profile(L.zTop, zL);       // return, gripping the card's edge
-          post = profile(L.zTop, L.zTop);  // post, solid to the top
+          if (!want[sd.k] || !sd.ok) continue;
+          outer = sd.outer;
+          inner = sd.inner;
+          zL = sd.zLedge; zBase = zL - L.sill;
+          mid = profile(zBase, zL + L.lip, zL);   // bottom border, open above
+          ret = profile(zBase, sd.zTop, zL);      // return, gripping the edge
+          post = profile(zBase, sd.zTop, sd.zTop); // post, solid to the top
           sweepVar(sd, [
             { u: -outer, p: post }, { u: -inner, p: post },
             { u: -inner, p: ret }, { u: -(inner - L.lip), p: ret },
@@ -1295,6 +1383,250 @@
           made++;
         }
         return made;
+      }
+
+      // --- the card that drops into a holder ------------------------------
+      // Glyph outlines, flattened. opentype hands them back with y pointing
+      // down, so flip them on the way out, and chop the curves fine enough
+      // that a 0.4 mm nozzle cannot tell they were ever curves.
+      function textLoops(font, text, size) {
+        var cmds = font.getPath(text, 0, 0, size).commands;
+        var out = [], cur = null, x = 0, y = 0, i, c, n, j, u, a;
+        function push(px, py) { cur.push([px, -py]); }
+        function steps(len) { return clamp(Math.ceil(len / 0.1), 2, 40); }
+        function close() { if (cur && cur.length > 2) out.push(cur); cur = null; }
+        for (i = 0; i < cmds.length; i++) {
+          c = cmds[i];
+          if (c.type === 'M') { close(); cur = []; push(c.x, c.y); x = c.x; y = c.y; }
+          else if (!cur) continue;
+          else if (c.type === 'L') { push(c.x, c.y); x = c.x; y = c.y; }
+          else if (c.type === 'Q') {
+            n = steps(Math.hypot(c.x1 - x, c.y1 - y) + Math.hypot(c.x - c.x1, c.y - c.y1));
+            for (j = 1; j <= n; j++) {
+              u = j / n; a = 1 - u;
+              push(a * a * x + 2 * a * u * c.x1 + u * u * c.x,
+                   a * a * y + 2 * a * u * c.y1 + u * u * c.y);
+            }
+            x = c.x; y = c.y;
+          } else if (c.type === 'C') {
+            n = steps(Math.hypot(c.x1 - x, c.y1 - y) + Math.hypot(c.x2 - c.x1, c.y2 - c.y1)
+                      + Math.hypot(c.x - c.x2, c.y - c.y2));
+            for (j = 1; j <= n; j++) {
+              u = j / n; a = 1 - u;
+              push(a * a * a * x + 3 * a * a * u * c.x1 + 3 * a * u * u * c.x2 + u * u * u * c.x,
+                   a * a * a * y + 3 * a * a * u * c.y1 + 3 * a * u * u * c.y2 + u * u * u * c.y);
+            }
+            x = c.x; y = c.y;
+          } else if (c.type === 'Z') { close(); }
+        }
+        close();
+        return out.map(tidy).map(straighten).filter(function (p) { return p.length > 2; });
+      }
+
+      // Points sitting on a straight run make the triangulator drop zero-area
+      // triangles, and then the flat face no longer meets the wall around it.
+      function straighten(p) {
+        var out = [], n = p.length, i, a, b, c, ax, ay, len;
+        for (i = 0; i < n; i++) {
+          a = p[(i + n - 1) % n]; b = p[i]; c = p[(i + 1) % n];
+          ax = c[0] - a[0]; ay = c[1] - a[1];
+          len = Math.hypot(ax, ay);
+          if (len > 1e-9 &&
+              Math.abs((b[0] - a[0]) * ay - (b[1] - a[1]) * ax) / len < 1e-4) continue;
+          out.push(b);
+        }
+        return out.length > 2 ? out : p;
+      }
+
+      function loopArea(p) {
+        var a = 0, i, j;
+        for (i = 0, j = p.length - 1; i < p.length; j = i++) {
+          a += p[j][0] * p[i][1] - p[i][0] * p[j][1];
+        }
+        return a / 2;
+      }
+      function inLoop(pt, p) {
+        var hit = false, i, j;
+        for (i = 0, j = p.length - 1; i < p.length; j = i++) {
+          if ((p[i][1] > pt[1]) !== (p[j][1] > pt[1]) &&
+              pt[0] < (p[j][0] - p[i][0]) * (pt[1] - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) {
+            hit = !hit;
+          }
+        }
+        return hit;
+      }
+      // Letters arrive as a pile of loops. Which way a loop is wound says
+      // whether it is a letter body or a counter, like the middle of an O.
+      // Nesting cannot be trusted for it: a cedilla, the bars of a # and the
+      // stroke of a $ all sit on top of the body they belong to. Each body
+      // becomes a shell of its own, so bodies that overlap simply weld.
+      function textGroups(loops) {
+        var i, j, area = [], big = 0, owner, slot = [], groups = [];
+        for (i = 0; i < loops.length; i++) {
+          area[i] = loopArea(loops[i]);
+          if (Math.abs(area[i]) > Math.abs(area[big])) big = i;
+        }
+        // The widest loop has to be a body, so its winding names the rest.
+        var solid = area.length ? area[big] > 0 : true;
+        for (i = 0; i < loops.length; i++) {
+          if ((area[i] > 0) !== solid) continue;
+          slot[i] = groups.length;
+          groups.push({ outer: wind(loops[i], true), holes: [] });
+        }
+        for (i = 0; i < loops.length; i++) {
+          if ((area[i] > 0) === solid) continue;
+          owner = -1;
+          for (j = 0; j < loops.length; j++) {
+            if (slot[j] == null || !inLoop(loops[i][0], loops[j])) continue;
+            if (owner < 0 || Math.abs(area[j]) < Math.abs(area[owner])) owner = j;
+          }
+          if (owner >= 0) groups[slot[owner]].holes.push(wind(loops[i], false));
+        }
+        return groups;
+      }
+      function wind(p, ccw) {
+        return (loopArea(p) > 0) === ccw ? p : p.slice().reverse();
+      }
+
+      // Two loops of one letter sometimes meet at a single point, the way a
+      // cedilla hangs off its C. Left alone that point turns into an edge with
+      // four faces on it, so ease both loops out a hair and let them overlap.
+      function unpinch(rings) {
+        var seen = {}, i, k, r, key, a, b, n;
+        function id(p) { return p[0].toFixed(4) + ',' + p[1].toFixed(4); }
+        for (k = 0; k < rings.length; k++) {
+          for (i = 0; i < rings[k].length; i++) {
+            key = id(rings[k][i]);
+            seen[key] = seen[key] == null ? k : (seen[key] === k ? k : -1);
+          }
+        }
+        for (k = 0; k < rings.length; k++) {
+          r = rings[k];
+          for (i = 0; i < r.length; i++) {
+            if (seen[id(r[i])] !== -1) continue;
+            a = r[(i + r.length - 1) % r.length]; b = r[(i + 1) % r.length];
+            n = outward(a, r[i], b);
+            r[i] = [r[i][0] + n[0] * 0.006, r[i][1] + n[1] * 0.006];
+          }
+        }
+      }
+      // Which way a corner of a counter-clockwise loop faces, away from its
+      // own material.
+      function outward(a, v, b) {
+        var ux = v[0] - a[0], uy = v[1] - a[1], vx = b[0] - v[0], vy = b[1] - v[1];
+        var lu = Math.hypot(ux, uy) || 1, lv = Math.hypot(vx, vy) || 1;
+        var nx = uy / lu + vy / lv, ny = -ux / lu - vx / lv;
+        var l = Math.hypot(nx, ny);
+        return l > 1e-9 ? [nx / l, ny / l] : [0, 0];
+      }
+
+      // Raise one letter body and its counters between two heights.
+      function emboss(s, g, z0, z1) {
+        var flat = [], idx = [], rings = [g.outer].concat(g.holes), i, k, tri;
+        for (k = 0; k < rings.length; k++) {
+          if (k) idx.push(flat.length / 2);
+          for (i = 0; i < rings[k].length; i++) flat.push(rings[k][i][0], rings[k][i][1]);
+        }
+        tri = earcut(flat, idx, 2);
+        function pt(n, z) { return [flat[n * 2], flat[n * 2 + 1], z]; }
+
+        var used = {}, key, a, b;
+        for (i = 0; i + 2 < tri.length; i += 3) {
+          s.tri(pt(tri[i], z1), pt(tri[i + 1], z1), pt(tri[i + 2], z1));
+          s.tri(pt(tri[i], z0), pt(tri[i + 2], z0), pt(tri[i + 1], z0));
+          for (k = 0; k < 3; k++) {
+            key = tri[i + k] + ':' + tri[i + (k + 1) % 3];
+            used[key] = (used[key] || 0) + 1;
+          }
+        }
+        // Walls climb wherever the flat face has an edge no neighbour answers.
+        // Reading them off the triangulation rather than off the loops keeps
+        // the two in step even when the triangulator merges a point away while
+        // it bridges a counter.
+        for (key in used) {
+          if (!Object.prototype.hasOwnProperty.call(used, key)) continue;
+          a = +key.split(':')[0]; b = +key.split(':')[1];
+          for (k = used[key] - (used[b + ':' + a] || 0); k > 0; k--) {
+            s.quad(pt(a, z0), pt(b, z0), pt(b, z1), pt(a, z1));
+          }
+        }
+      }
+
+      // A card to drop into one holder: a flat plate with the text standing
+      // 1 mm proud of it. It comes out lying down with the text upwards, which
+      // is how it has to be printed anyway. The text sinks a little way into
+      // the plate rather than sitting exactly on it, so the two shells overlap
+      // instead of sharing a surface, and the slicer welds them.
+      function labelPlate(P, wall, text, font) {
+        var L = labelSpec(P), i;
+        var sd = labelSides(P).filter(function (x) { return x.wall === wall; })[0];
+        if (!sd || !sd.ok) return null;
+
+        var w = 2 * sd.inner - L.fit, hgt = L.winH, s = soup();
+        var x0 = -w / 2, x1 = w / 2, y0 = -hgt / 2, y1 = hgt / 2, z1 = L.card;
+        function p(x, y, z) { return [x, y, z]; }
+        s.quad(p(x0, y0, 0), p(x0, y1, 0), p(x1, y1, 0), p(x1, y0, 0));
+        s.quad(p(x0, y0, z1), p(x1, y0, z1), p(x1, y1, z1), p(x0, y1, z1));
+        s.quad(p(x0, y0, 0), p(x1, y0, 0), p(x1, y0, z1), p(x0, y0, z1));
+        s.quad(p(x1, y0, 0), p(x1, y1, 0), p(x1, y1, z1), p(x1, y0, z1));
+        s.quad(p(x1, y1, 0), p(x0, y1, 0), p(x0, y1, z1), p(x1, y1, z1));
+        s.quad(p(x0, y1, 0), p(x0, y0, 0), p(x0, y0, z1), p(x0, y1, z1));
+
+        // Only the part the frame leaves uncovered is worth writing on, and
+        // the text grows until it just fits that, whatever the box's size.
+        var pad = clamp(Math.min(w, hgt) * 0.09, 0.8, 2.2);
+        var winW = 2 * (sd.inner - L.lip) - 2 * pad;
+        var winH = hgt - L.lip - 2 * pad;
+        var size = 0, groups = [];
+        var str = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+        if (font && str && winW > 2 && winH > 2) {
+          var bb = font.getPath(str, 0, 0, 100).getBoundingBox();
+          var bw = bb.x2 - bb.x1, bh = bb.y2 - bb.y1;
+          if (bw > 0.01 && bh > 0.01) {
+            size = 100 * Math.min(winW / bw, winH / bh);
+            var loops = textLoops(font, str, size);
+            // Centre it on the opening, which sits above the plate's middle by
+            // half the bottom border.
+            var lo = [Infinity, Infinity], hi = [-Infinity, -Infinity];
+            loops.forEach(function (r) {
+              r.forEach(function (q) {
+                lo[0] = Math.min(lo[0], q[0]); hi[0] = Math.max(hi[0], q[0]);
+                lo[1] = Math.min(lo[1], q[1]); hi[1] = Math.max(hi[1], q[1]);
+              });
+            });
+            var dx = -(lo[0] + hi[0]) / 2, dy = L.lip / 2 - (lo[1] + hi[1]) / 2;
+            loops.forEach(function (r) {
+              r.forEach(function (q) { q[0] += dx; q[1] += dy; });
+            });
+            groups = textGroups(loops);
+            unpinch(groups.reduce(function (all, g) {
+              return all.concat([g.outer], g.holes);
+            }, []));
+            for (i = 0; i < groups.length; i++) emboss(s, groups[i], z1 - 0.4, z1 + 1);
+          }
+        }
+        return {
+          v: s.done(), w: w, h: hgt, thick: L.card, raise: 1,
+          size: size, letters: groups.length, text: str
+        };
+      }
+
+      // Stand a card up in its holder, for the preview. Local x runs along the
+      // wall the way a reader's eye does, y up it, z out of the skin.
+      function placeLabel(v, P, wall) {
+        var L = labelSpec(P), i;
+        var sd = labelSides(P).filter(function (x) { return x.wall === wall; })[0];
+        if (!sd) return v;
+        // Centred in the pocket, so the same gap shows front and back.
+        var gap = (L.slot - L.card) / 2, zMid = (sd.zLedge + sd.zTop) / 2;
+        var out = new Float32Array(v.length);
+        for (i = 0; i < v.length; i += 3) {
+          var d = sd.p + gap + v[i + 2], u = v[i];
+          out[i] = sd.o[0] * d - sd.o[1] * u;
+          out[i + 1] = sd.o[1] * d + sd.o[0] * u;
+          out[i + 2] = zMid + v[i + 1];
+        }
+        return out;
       }
 
       // Half-widths up a stadium lying on its side: a flat run of 2(L-r) with a
@@ -1453,10 +1785,8 @@
         for (r = 0; r < loop.runs.length; r++) straight += S[loop.runs[r].i1] - S[loop.runs[r].i0];
         var cornerLen = Math.max(0, total - straight) / 4;
 
-        // A label holder wants the same strip of wall, so it wins the tie.
         var wantHandle = {
-          xp: P.handleXP && !P.labelXP, xn: P.handleXN && !P.labelXN,
-          yp: P.handleYP && !P.labelYP, yn: P.handleYN && !P.labelYN
+          xp: P.handleXP, xn: P.handleXN, yp: P.handleYP, yn: P.handleYN
         };
 
         for (r = 0; r < loop.runs.length; r++) {
@@ -2116,7 +2446,8 @@
 
       root.BoxEngine = {
         DEFAULTS: D, compute: compute, build: build, buildLid: buildLid,
-        labelSpec: labelSpec, toStl: toStl
+        labelSpec: labelSpec, labelSides: labelSides,
+        labelPlate: labelPlate, placeLabel: placeLabel, toStl: toStl
       };
 
     })(typeof window !== 'undefined' ? window : this);
@@ -2188,6 +2519,51 @@
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
     }
 
+    // Exo's outlines, fetched once. The stylesheet only gets the face on
+    // screen; cutting it in plastic needs the curves. Until it lands, and for
+    // good if it never does, labels come out blank rather than not at all.
+    var FONT_URL = 'https://cdn.jsdelivr.net/npm/@expo-google-fonts/exo@0.2.3/Exo_600SemiBold.ttf';
+    var fontState = { font: null, failed: false, waiting: [] };
+    (function () {
+      function settle() { fontState.waiting.splice(0).forEach(function (fn) { fn(); }); }
+      if (typeof opentype === 'undefined' || typeof fetch !== 'function') {
+        fontState.failed = true;
+        return;
+      }
+      fetch(FONT_URL).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      }).then(function (buf) {
+        fontState.font = opentype.parse(buf);
+        settle();
+      })['catch'](function () {
+        fontState.failed = true;
+        settle();
+      });
+    })();
+    function useFont() {
+      var s = React.useState(0), bump = s[1];
+      React.useEffect(function () {
+        if (fontState.font || fontState.failed) return;
+        var live = true;
+        fontState.waiting.push(function () {
+          if (live) bump(function (n) { return n + 1; });
+        });
+        return function () { live = false; };
+      }, []);
+      return fontState;
+    }
+
+    // The same colour knocked back, so a card reads against the shell.
+    function shade(hex, k) {
+      var n = parseInt(String(hex).replace('#', ''), 16);
+      if (isNaN(n)) return hex;
+      return '#' + ((1 << 24)
+        + (Math.round(((n >> 16) & 255) * k) << 16)
+        + (Math.round(((n >> 8) & 255) * k) << 8)
+        + Math.round((n & 255) * k)).toString(16).slice(1);
+    }
+
     var CHEVRON = 'M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z';
 
     function Field(p) {
@@ -2201,6 +2577,14 @@
     function NumberInput(p) {
       return h('input', {
         type: 'number', value: p.value, min: p.min, max: p.max, step: p.step || 1,
+        onChange: function (e) { p.onChange(e.target.value); }
+      });
+    }
+
+    function TextInput(p) {
+      return h('input', {
+        type: 'text', value: p.value || '', maxLength: p.maxLength || 40,
+        placeholder: p.placeholder, 'aria-label': p.label,
         onChange: function (e) { p.onChange(e.target.value); }
       });
     }
@@ -2449,6 +2833,11 @@
       ['80x160x100', '80 × 160 × 100', { boxX: 80, boxY: 160, boxZ: 100 }]
     ];
 
+    // The order the wall checkboxes read in, reused for the label cards.
+    var WALLS = ['YP', 'YN', 'XN', 'XP'];
+    var WALL_TAG = { YP: 'y+', YN: 'y-', XN: 'x-', XP: 'x+' };
+    var WALL_AXIS = { YP: '+Y', YN: '−Y', XN: '−X', XP: '+X' };
+
     function App() {
       var t = useLang();
       var st = React.useState({
@@ -2458,19 +2847,12 @@
         floorHoneycomb: false,
         handleXP: false, handleXN: false, handleYP: false, handleYN: false,
         labelXP: false, labelXN: false, labelYP: false, labelYN: false,
+        textXP: '', textXN: '', textYP: '', textYN: '',
         withLid: false, lidT: 4, lidClear: 0.3,
         lidGrip: false, lidHoneycomb: false
       });
       var o = st[0], setO = st[1];
       function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
-      // A wall takes a grip or a label holder, never both: they want the same
-      // strip of skin, so turning one on turns the other off.
-      function setWall(kind, wall, v) {
-        var patch = {};
-        patch[kind + wall] = v;
-        if (v) patch[(kind === 'label' ? 'handle' : 'label') + wall] = false;
-        setO(Object.assign({}, o, patch));
-      }
 
       var stColor = React.useState('#5b6470'); var colour = stColor[0], setColour = stColor[1];
       var stView = React.useState('box'); var view = stView[0], setView = stView[1];
@@ -2483,10 +2865,34 @@
         return P.valid && P.withLid ? BE.buildLid(P) : null;
       }, [P]);
       var label = React.useMemo(function () { return BE.labelSpec(P); }, [P]);
+      // Walls asked for a holder that the grip above it has squeezed out.
+      var cramped = React.useMemo(function () {
+        if (!P.valid || !label.ok) return [];
+        var sides = BE.labelSides(P);
+        return WALLS.filter(function (w) {
+          var sd = sides.filter(function (x) { return x.wall === w; })[0];
+          return o['label' + w] && sd && sd.grip && !sd.room;
+        }).map(function (w) { return WALL_AXIS[w]; });
+      }, [P, label, o.labelYP, o.labelYN, o.labelXN, o.labelXP]);
+
+      // A card for every holder that has something written on it. A blank one
+      // is nothing worth printing, so it stays out of the preview too.
+      var font = useFont();
+      var texts = WALLS.map(function (w) { return o['text' + w]; }).join('\u0000');
+      var plates = React.useMemo(function () {
+        if (!P.valid) return [];
+        return WALLS.filter(function (w) {
+          return o['label' + w] && String(o['text' + w] || '').trim();
+        }).map(function (w) {
+          var part = BE.labelPlate(P, w, o['text' + w], font.font);
+          return part ? { wall: w, part: part } : null;
+        }).filter(function (x) { return x; });
+      }, [P, texts, font.font, o.labelYP, o.labelYN, o.labelXN, o.labelXP]);
 
       var stage = useStage3D({ azimuth: 0.85, polar: 1.02, distance: 3.2, min: 0.9, max: 14 });
       var meshRef = React.useRef(null);
       var lidRef = React.useRef(null);
+      var cardRef = React.useRef([]);
 
       function toPreviewMesh(v, colour, yLift) {
         var geo = new THREE.BufferGeometry();
@@ -2515,12 +2921,24 @@
         }
         clear(meshRef);
         clear(lidRef);
+        cardRef.current.forEach(function (m) {
+          stg.scene.remove(m); m.geometry.dispose(); m.material.dispose();
+        });
+        cardRef.current = [];
         var k = 0.01;
         var showBox = view === 'box' || view === 'both';
         var showLid = (view === 'lid' || view === 'both') && lidModel;
         if (showBox && model) {
           meshRef.current = toPreviewMesh(model.v, colour, -P.boxZ * k / 2);
           stg.scene.add(meshRef.current);
+          // The cards ride with the box, seated in the holders they belong to,
+          // a shade darker so the writing reads against the shell.
+          plates.forEach(function (pl) {
+            var m = toPreviewMesh(BE.placeLabel(pl.part.v, P, pl.wall),
+              shade(colour, 0.82), -P.boxZ * k / 2);
+            cardRef.current.push(m);
+            stg.scene.add(m);
+          });
         }
         if (showLid) {
           // Hold the lid clear of the mouth when both are shown, skirt and all.
@@ -2532,7 +2950,7 @@
           stg.scene.add(lidRef.current);
         }
         stage.request();
-      }, [model, lidModel, colour, view, P.boxZ, P.baseChamfer, P.lidClear, P.lidT]);
+      }, [model, lidModel, plates, colour, view, P.boxZ, P.baseChamfer, P.lidClear, P.lidT]);
 
       // Frame the piece: enough distance that the longest side always fits.
       React.useEffect(function () {
@@ -2560,19 +2978,28 @@
       // files as well as the view.
       var wantsBox = view !== 'lid' && !!model;
       var wantsLid = view !== 'box' && !!lidModel;
+      // The cards print on their own, flat and text upwards, so they leave as
+      // one file each rather than joining the box.
+      var wantsCards = wantsBox ? plates : [];
+      var files = (wantsBox ? 1 : 0) + (wantsLid ? 1 : 0) + wantsCards.length;
       function saveSelection() {
-        var name = baseName();
+        var name = baseName(), queue = [];
         if (wantsBox) {
-          download(new Blob([BE.toStl(model.v, 'Organizer box ' + name)], { type: 'model/stl' }),
-            name + '.stl');
+          queue.push([model.v, 'Organizer box ' + name, name + '.stl']);
         }
         if (wantsLid) {
-          // Staggered, or the browser lumps the pair into one blocked popup.
-          setTimeout(function () {
-            download(new Blob([BE.toStl(lidModel.v, 'Organizer lid ' + name)], { type: 'model/stl' }),
-              name + '-tampa.stl');
-          }, wantsBox ? 400 : 0);
+          queue.push([lidModel.v, 'Organizer lid ' + name, name + '-tampa.stl']);
         }
+        wantsCards.forEach(function (pl) {
+          queue.push([pl.part.v, 'Organizer label ' + pl.part.text,
+            name + '-etiqueta-' + WALL_TAG[pl.wall] + '.stl']);
+        });
+        // Staggered, or the browser lumps them into one blocked popup.
+        queue.forEach(function (job, i) {
+          setTimeout(function () {
+            download(new Blob([BE.toStl(job[0], job[1])], { type: 'model/stl' }), job[2]);
+          }, i * 400);
+        });
       }
 
       var warnings = [];
@@ -2650,10 +3077,10 @@
             h('div', { className: 'card' },
               h('h2', null, t('handlesCard')),
               h('div', { className: 'checkgrid' },
-                h(Check, { id: 'handleYP', label: t('wallYP'), checked: o.handleYP, onChange: function (v) { setWall('handle', 'YP', v); } }),
-                h(Check, { id: 'handleYN', label: t('wallYN'), checked: o.handleYN, onChange: function (v) { setWall('handle', 'YN', v); } }),
-                h(Check, { id: 'handleXN', label: t('wallXN'), checked: o.handleXN, onChange: function (v) { setWall('handle', 'XN', v); } }),
-                h(Check, { id: 'handleXP', label: t('wallXP'), checked: o.handleXP, onChange: function (v) { setWall('handle', 'XP', v); } })
+                h(Check, { id: 'handleYP', label: t('wallYP'), checked: o.handleYP, onChange: function (v) { set('handleYP', v); } }),
+                h(Check, { id: 'handleYN', label: t('wallYN'), checked: o.handleYN, onChange: function (v) { set('handleYN', v); } }),
+                h(Check, { id: 'handleXN', label: t('wallXN'), checked: o.handleXN, onChange: function (v) { set('handleXN', v); } }),
+                h(Check, { id: 'handleXP', label: t('wallXP'), checked: o.handleXP, onChange: function (v) { set('handleXP', v); } })
               ),
               h('div', { className: 'hint' }, t('handlesHint'))
             ),
@@ -2661,11 +3088,32 @@
             h('div', { className: 'card' },
               h('h2', null, t('labelsCard')),
               h('div', { className: 'checkgrid' },
-                h(Check, { id: 'labelYP', label: t('wallYP'), checked: o.labelYP, onChange: function (v) { setWall('label', 'YP', v); } }),
-                h(Check, { id: 'labelYN', label: t('wallYN'), checked: o.labelYN, onChange: function (v) { setWall('label', 'YN', v); } }),
-                h(Check, { id: 'labelXN', label: t('wallXN'), checked: o.labelXN, onChange: function (v) { setWall('label', 'XN', v); } }),
-                h(Check, { id: 'labelXP', label: t('wallXP'), checked: o.labelXP, onChange: function (v) { setWall('label', 'XP', v); } })
+                h(Check, { id: 'labelYP', label: t('wallYP'), checked: o.labelYP, onChange: function (v) { set('labelYP', v); } }),
+                h(Check, { id: 'labelYN', label: t('wallYN'), checked: o.labelYN, onChange: function (v) { set('labelYN', v); } }),
+                h(Check, { id: 'labelXN', label: t('wallXN'), checked: o.labelXN, onChange: function (v) { set('labelXN', v); } }),
+                h(Check, { id: 'labelXP', label: t('wallXP'), checked: o.labelXP, onChange: function (v) { set('labelXP', v); } })
               ),
+              WALLS.filter(function (w) { return o['label' + w]; }).map(function (w) {
+                // Below about 4 mm of body the strokes come out thinner than a
+                // single bead and the letters print ragged.
+                var made = plates.filter(function (pl) { return pl.wall === w; })[0];
+                return h(Field, {
+                  key: w, label: t('labelText', WALL_AXIS[w]),
+                  hint: made && made.part.size > 0 && made.part.size < 4 ? t('labelSmall') : null
+                },
+                  h(TextInput, {
+                    value: o['text' + w], label: t('labelText', WALL_AXIS[w]),
+                    placeholder: t('labelTextHint'),
+                    onChange: function (v) { set('text' + w, v); }
+                  })
+                );
+              }),
+              cramped.length
+                ? h('div', { className: 'alert warn' }, t('labelNoRoom', cramped.join(', ')))
+                : null,
+              WALLS.some(function (w) { return o['label' + w]; })
+                ? h('div', { className: 'hint' }, t('labelPrintHint')) : null,
+              font.failed ? h('div', { className: 'alert warn' }, t('labelFontOff')) : null,
               label.ok ? h('div', { className: 'hint', style: { marginTop: '6px' } },
                 t('labelCard', n1(label.wy), n1(label.winH), n1(label.wx), n1(label.winH),
                   n1(label.card))) : null,
@@ -2751,14 +3199,15 @@
               h('div', { className: 'controls bar' },
                 h('button', {
                   type: 'button', className: 'btn grow',
-                  disabled: !wantsBox && !wantsLid, onClick: saveSelection
+                  disabled: !files, onClick: saveSelection
                 },
                   h('svg', {
                     viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
                     strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
                   }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
-                  wantsBox && wantsLid ? t('downloadBoth')
-                    : (wantsLid ? t('downloadLid') : t('download')))
+                  files > 2 || (files === 2 && !(wantsBox && wantsLid)) ? t('downloadMany', files)
+                    : (files === 2 ? t('downloadBoth')
+                      : (wantsLid ? t('downloadLid') : t('download'))))
               )
             )
           )

@@ -30,8 +30,17 @@ mais favos, todos do mesmo tamanho.
   calhas — os três encaixes agarram 2,5 mm cada, para a moldura fechar por
   igual. A bolsa tem 2,4 mm, para uma etiqueta impressa de 2 mm. A soleira
   leva um chanfre a 45° por baixo, por isso imprime sem suportes. O painel
-  indica o tamanho da etiqueta a imprimir para cada parede. Uma parede leva
-  pega ou porta-etiquetas, nunca os dois: ligar um desliga o outro
+  indica o tamanho da etiqueta a imprimir para cada parede. A mesma parede pode
+  levar pega e porta-etiquetas: nesse caso a moldura desce para debaixo da
+  pega. Se a caixa for baixa de mais para as duas coisas, a app diz quais as
+  paredes onde não cabem
+- **Etiquetas escritas** — cada porta-etiquetas ligado abre um campo de texto.
+  O que escreveres vira uma placa à parte: 2 mm de base e 1 mm de letra em
+  relevo, na Exo, com o corpo a crescer até encher a janela da moldura. A placa
+  aparece no sítio na pré-visualização e sai num STL próprio, já deitada com o
+  texto para cima, que é como tem de ser impressa. Se a caixa for pequena para
+  o texto que escreveste, a app avisa antes de as letras ficarem mais finas do
+  que um cordão de material
 - **Tampa** — peça sólida que usa o mesmo encaixe das caixas: por baixo leva o
   pé chanfrado da caixa, por cima leva o rebaixo da boca. Assenta na caixa como
   uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa
@@ -44,7 +53,8 @@ mais favos, todos do mesmo tamanho.
 
 1. Abre `index.html` no browser
 2. Ajusta medidas, grelha, pegas, porta-etiquetas e tampa
-3. Vê a peça em 3D e descarrega o STL
+3. Escreve o texto das etiquetas que quiseres
+4. Vê as peças em 3D e descarrega os STL
 
 A interface está em inglês, português, espanhol, francês, alemão, italiano,
 chinês simplificado e japonês.
@@ -54,3 +64,7 @@ chinês simplificado e japonês.
 Sem suportes, com o fundo na mesa. As nervuras de 1,333 mm saem com 3 a 4
 perímetros num bico de 0,4 mm; se o teu fatiador as deixar ocas, reduz a largura
 de extrusão ou aumenta a nervura na app.
+
+As etiquetas imprimem-se deitadas, sem suportes. O texto começa na camada dos
+2 mm, por isso é aí que podes trocar de filamento se quiseres a letra noutra
+cor.
