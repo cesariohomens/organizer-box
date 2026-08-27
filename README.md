@@ -22,8 +22,8 @@ mais favos, todos do mesmo tamanho.
 ## Opções
 
 - **Fundo em colmeia** — fura o fundo com a mesma grelha hexagonal
-- **Pegas nas paredes** — abre um furo hexagonal largo perto do topo em cada
-  parede que escolheres (+X, −X, +Y, −Y)
+- **Pegas nas paredes** — abre uma ranhura oval perto do topo em cada parede que
+  escolheres (+X, −X, +Y, −Y), com a mesma forma da pega da tampa
 - **Tampa** — peça sólida que usa o mesmo encaixe das caixas: por baixo leva o
   pé chanfrado da caixa, por cima leva o rebaixo da boca. Assenta na caixa como
   uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa

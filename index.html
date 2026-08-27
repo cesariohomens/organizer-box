@@ -337,7 +337,7 @@
 
       floorHoneycomb: 'Fundo em colmeia',
       handlesCard: 'Pegas nas paredes',
-      handlesHint: 'Abre uma pega hexagonal larga perto do topo da colmeia em cada parede seleccionada.',
+      handlesHint: 'Abre uma ranhura oval perto do topo da colmeia em cada parede seleccionada, igual à pega da tampa.',
       wallXP: 'Parede +X (direita)',
       wallXN: 'Parede −X (esquerda)',
       wallYP: 'Parede +Y (frente)',
@@ -408,7 +408,7 @@
 
       floorHoneycomb: 'Honeycomb floor',
       handlesCard: 'Wall handles',
-      handlesHint: 'Cut a wide hexagonal grip near the top of the honeycomb on each selected wall.',
+      handlesHint: 'Cut an oval slot near the top of the honeycomb on each selected wall, the same shape as the lid grip.',
       wallXP: '+X wall (right)',
       wallXN: '−X wall (left)',
       wallYP: '+Y wall (front)',
@@ -479,7 +479,7 @@
 
       floorHoneycomb: 'Fondo de panal',
       handlesCard: 'Asas en las paredes',
-      handlesHint: 'Abre un agarre hexagonal ancho cerca de la parte superior del panal en cada pared seleccionada.',
+      handlesHint: 'Abre una ranura ovalada cerca de la parte superior del panal en cada pared seleccionada, igual que el asa de la tapa.',
       wallXP: 'Pared +X (derecha)',
       wallXN: 'Pared −X (izquierda)',
       wallYP: 'Pared +Y (frente)',
@@ -550,7 +550,7 @@
 
       floorHoneycomb: 'Fond en nid d’abeille',
       handlesCard: 'Poignées murales',
-      handlesHint: 'Découpe une large prise hexagonale près du haut du nid d’abeille sur chaque paroi sélectionnée.',
+      handlesHint: 'Découpe une fente ovale près du haut du nid d’abeille sur chaque paroi sélectionnée, comme la prise du couvercle.',
       wallXP: 'Paroi +X (droite)',
       wallXN: 'Paroi −X (gauche)',
       wallYP: 'Paroi +Y (avant)',
@@ -621,7 +621,7 @@
 
       floorHoneycomb: 'Wabenboden',
       handlesCard: 'Wandgriffe',
-      handlesHint: 'Schneidet einen breiten sechseckigen Griff nahe dem oberen Rand der Wabe in jede gewählte Wand.',
+      handlesHint: 'Schneidet einen ovalen Schlitz nahe dem oberen Rand der Wabe in jede gewählte Wand, wie den Griff im Deckel.',
       wallXP: 'Wand +X (rechts)',
       wallXN: 'Wand −X (links)',
       wallYP: 'Wand +Y (vorne)',
@@ -692,7 +692,7 @@
 
       floorHoneycomb: 'Fondo a nido d’ape',
       handlesCard: 'Maniglie sulle pareti',
-      handlesHint: 'Apre una presa esagonale larga vicino alla cima del nido d’ape su ogni parete selezionata.',
+      handlesHint: 'Apre un’asola ovale vicino alla cima del nido d’ape su ogni parete selezionata, come la presa del coperchio.',
       wallXP: 'Parete +X (destra)',
       wallXN: 'Parete −X (sinistra)',
       wallYP: 'Parete +Y (fronte)',
@@ -763,7 +763,7 @@
 
       floorHoneycomb: '蜂窝底板',
       handlesCard: '侧壁提手',
-      handlesHint: '在所选侧壁蜂窝靠上的位置开出较宽的六角提手孔。',
+      handlesHint: '在所选侧壁蜂窝靠上的位置开出椭圆形提手孔，形状与盖子的提手一致。',
       wallXP: '+X 壁（右）',
       wallXN: '−X 壁（左）',
       wallYP: '+Y 壁（前）',
@@ -834,7 +834,7 @@
 
       floorHoneycomb: 'ハニカム底',
       handlesCard: '壁の取っ手',
-      handlesHint: '選択した壁のハニカム上部付近に、幅広の六角取っ手穴を開けます。',
+      handlesHint: '選択した壁のハニカム上部付近に、ふたの指かけ穴と同じ長円形の取っ手穴を開けます。',
       wallXP: '+X 壁（右）',
       wallXN: '−X 壁（左）',
       wallYP: '+Y 壁（前）',
@@ -1137,6 +1137,18 @@
         return { pts: out, depth: depth };
       }
 
+      // Half-widths up a stadium lying on its side: a flat run of 2(L-r) with a
+      // semicircular cap at each end. Sampling it once here keeps the wall
+      // faces and the opening's side walls on the same chords.
+      function gripProfile(z, L, r) {
+        var steps = 10, out = [], i, a;
+        for (i = 0; i <= steps; i++) {
+          a = -Math.PI / 2 + Math.PI * i / steps;
+          out.push([z + r * Math.sin(a), (L - r) + r * Math.cos(a)]);
+        }
+        return out;
+      }
+
       // -------------------------------------------------------- honeycomb
 
       // Rows are half a pitch apart and alternate between even and odd
@@ -1298,23 +1310,33 @@
               holes.push({ kind: 'hex', s: mid + j * P.colPitch, z: rows[k].z });
             }
           }
-          // Wide hexagonal grip near the top of the honeycomb band.
-          if (wantHandle[loop.runs[r].wall] && half > 18 && P.band > 16) {
-            var hR = Math.min(P.holeR * 2.4, half * 0.5, 22);
-            var hHH = hR * 0.5; // flat-top hex half-height
-            var hZ = P.rimBottom - hHH - 1.5;
-            if (hZ - hHH > P.bandBottom + 0.8) {
-              holes.push({ kind: 'handle', s: mid, z: hZ, R: hR, hh: hHH });
+          // Grip near the top of the band, the same stadium the lid uses for
+          // its finger slot, laid on its side along the wall.
+          if (wantHandle[loop.runs[r].wall] && half > 14 && P.band > 14) {
+            var gr = Math.min(clamp(P.band * 0.18, 5.5, 13), (P.band - 4) / 2);
+            // Never past the ends of the straight run, even if that means a
+            // shallower slot than the proportions ask for.
+            var gL = Math.min(Math.max(half * 0.32, gr + 8), half * 0.6, 45);
+            gr = Math.min(gr, gL - 4);
+            var gZ = P.rimBottom - gr - 1.5;
+            if (gr > 3 && gL > gr + 4 && gZ - gr > P.bandBottom + 0.8) {
+              holes.push({
+                kind: 'handle', s: mid, z: gZ, L: gL, r: gr,
+                prof: gripProfile(gZ, gL, gr)
+              });
             }
           }
         }
         // Drop honeycomb cells that collide with a grip opening.
         function overlaps(a, b) {
-          var ra = a.kind === 'handle' ? a.R : P.holeR;
-          var rb = b.kind === 'handle' ? b.R : P.holeR;
-          var ha = a.kind === 'handle' ? a.hh : P.holeHH;
-          var hb = b.kind === 'handle' ? b.hh : P.holeHH;
-          return Math.abs(a.s - b.s) < ra + rb - 0.2 && Math.abs(a.z - b.z) < ha + hb - 0.2;
+          var ra = a.kind === 'handle' ? a.L : P.holeR;
+          var rb = b.kind === 'handle' ? b.L : P.holeR;
+          var ha = a.kind === 'handle' ? a.r : P.holeHH;
+          var hb = b.kind === 'handle' ? b.r : P.holeHH;
+          // Half a rib of slack, so a cell never grazes the grip and leaves a
+          // sliver the two openings have to share.
+          var gap = P.rib * 0.5;
+          return Math.abs(a.s - b.s) < ra + rb + gap && Math.abs(a.z - b.z) < ha + hb + gap;
         }
         var cleaned = [], iH, iG, skip;
         for (iH = 0; iH < holes.length; iH++) {
@@ -1332,42 +1354,68 @@
         var R = P.holeR, hh = P.holeHH;
         var lo = P.bandBottom, hi = P.rimBottom;
 
-        function holeR(h) { return h.kind === 'handle' ? h.R : R; }
-        function holeHH(h) { return h.kind === 'handle' ? h.hh : hh; }
+        function holeR(h) { return h.kind === 'handle' ? h.L : R; }
+        function holeHH(h) { return h.kind === 'handle' ? h.r : hh; }
         function holeHalfW(h, z) {
-          return holeR(h) * (1 - 0.5 * Math.abs(z - h.z) / holeHH(h));
+          if (h.kind !== 'handle') return R * (1 - 0.5 * Math.abs(z - h.z) / hh);
+          // Read the cap off the profile, so the faces meet the side walls on
+          // exactly the same chords.
+          var p = h.prof, n = p.length, q, f;
+          if (z <= p[0][0]) return p[0][1];
+          if (z >= p[n - 1][0]) return p[n - 1][1];
+          for (q = 0; q + 1 < n; q++) {
+            if (z <= p[q + 1][0]) {
+              f = (z - p[q][0]) / (p[q + 1][0] - p[q][0] || 1);
+              return p[q][1] + (p[q + 1][1] - p[q][1]) * f;
+            }
+          }
+          return p[n - 1][1];
         }
         function holeZ0(h) { return h.z - holeHH(h); }
         function holeZ1(h) { return h.z + holeHH(h); }
 
         // --- extra outline samples -----------------------------------
-        var splits = [], w;
+        var splits = [], edges = [], w;
         for (k = 0; k < holes.length; k++) {
           var h0 = holes[k];
-          splits.push(h0.s - holeR(h0) / 2, h0.s + holeR(h0) / 2);
-          var zLo = Math.max(holeZ0(h0), lo);
-          var zHi = Math.min(holeZ1(h0), hi);
+          if (h0.kind === 'handle') {
+            for (m = 0; m < h0.prof.length; m++) {
+              splits.push(h0.s - h0.prof[m][1], h0.s + h0.prof[m][1]);
+            }
+          } else {
+            splits.push(h0.s - holeR(h0) / 2, h0.s + holeR(h0) / 2);
+          }
+          // Where an opening is cut off by the top or bottom of the band its
+          // edge lands on the solid rim, which only has vertices where the
+          // outline does. Those marks have to survive the merge below or the
+          // rim and the wall face disagree about where the opening starts.
           if (holeZ0(h0) < lo) {
             w = holeHalfW(h0, lo);
-            splits.push(h0.s - w, h0.s + w);
+            edges.push(h0.s - w, h0.s + w);
           }
           if (holeZ1(h0) > hi) {
             w = holeHalfW(h0, hi);
-            splits.push(h0.s - w, h0.s + w);
+            edges.push(h0.s - w, h0.s + w);
           }
         }
-        if (splits.length) {
-          var MERGE = 0.005, marks = [[0, 2]];
+        if (splits.length || edges.length) {
+          // Marks only collapse when they are all but identical: anything
+          // coarser silently drops an opening's edge and leaves the solid rim
+          // and the wall face disagreeing about where that opening starts.
+          var MERGE = 0.005, SNAP = 1e-6, marks = [[0, 3]];
           for (i = 1; i < N; i++) marks.push([S[i], 0]);
           for (i = 0; i < splits.length; i++) {
             if (splits[i] > MERGE && splits[i] < total - MERGE) marks.push([splits[i], 1]);
+          }
+          for (i = 0; i < edges.length; i++) {
+            if (edges[i] > MERGE && edges[i] < total - MERGE) marks.push([edges[i], 2]);
           }
           marks.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
 
           var kept = [];
           for (i = 0; i < marks.length; i++) {
             var last = kept.length - 1;
-            if (last >= 0 && marks[i][0] - kept[last][0] <= MERGE) {
+            if (last >= 0 && marks[i][0] - kept[last][0] <= SNAP) {
               if (marks[i][1] > kept[last][1]) kept[last] = marks[i];
             } else kept.push(marks[i]);
           }
@@ -1393,10 +1441,14 @@
         // --- wall faces ----------------------------------------------
         var evts = [lo, hi];
         for (k = 0; k < holes.length; k++) {
-          var cLo = lo, cHi = hi;
-          evts.push(clamp(holeZ0(holes[k]), cLo, cHi),
-                    clamp(holes[k].z, cLo, cHi),
-                    clamp(holeZ1(holes[k]), cLo, cHi));
+          var cLo = lo, cHi = hi, hk = holes[k];
+          if (hk.kind === 'handle') {
+            for (m = 0; m < hk.prof.length; m++) evts.push(clamp(hk.prof[m][0], cLo, cHi));
+          } else {
+            evts.push(clamp(holeZ0(hk), cLo, cHi),
+                      clamp(hk.z, cLo, cHi),
+                      clamp(holeZ1(hk), cLo, cHi));
+          }
         }
         evts.sort(function (a, b) { return a - b; });
         var zs = [evts[0]];
@@ -1453,7 +1505,13 @@
           var h2 = holes[k];
           var cLo2 = lo, cHi2 = hi;
           var ring;
-          {
+          if (h2.kind === 'handle') {
+            // Up the right cap, back down the left one.
+            var p3 = h2.prof, n3 = p3.length;
+            ring = [];
+            for (i = 0; i < n3; i++) ring.push([h2.s + p3[i][1], p3[i][0]]);
+            for (i = n3 - 1; i >= 0; i--) ring.push([h2.s - p3[i][1], p3[i][0]]);
+          } else {
             var r2 = holeR(h2), hh2 = holeHH(h2);
             ring = [[h2.s + r2, h2.z], [h2.s + r2 / 2, h2.z + hh2], [h2.s - r2 / 2, h2.z + hh2],
                     [h2.s - r2, h2.z], [h2.s - r2 / 2, h2.z - hh2], [h2.s + r2 / 2, h2.z - hh2]];
