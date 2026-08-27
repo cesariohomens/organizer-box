@@ -18,6 +18,7 @@
 
   <!-- three.js: last release with a plain global build, so no bundler is needed -->
   <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/earcut@2.2.4/dist/earcut.min.js"></script>
 
   <style>
     /* -------------------------------------------------------------
@@ -167,6 +168,31 @@
       font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
     }
 
+
+    /* --- Switches ------------------------------------------------ */
+    .checkline { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
+    .checkline input[type="checkbox"] {
+      appearance:none; -webkit-appearance:none; margin:0; flex-shrink:0; position:relative;
+      width:40px; height:22px; border-radius:999px; border:none; background:#d6dae1; cursor:pointer;
+      transition:background .18s var(--ease);
+    }
+    .checkline input[type="checkbox"]::after {
+      content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+      background:#fff; box-shadow:0 1px 3px rgba(16,24,40,.3); transition:transform .18s var(--ease);
+    }
+    .checkline input[type="checkbox"]:checked { background:var(--ink); }
+    .checkline input[type="checkbox"]:checked::after { transform:translateX(18px); }
+    .checkline input[type="checkbox"]:focus-visible { outline:none; box-shadow:var(--ring); }
+    .checkline label { margin:0; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
+    .checkgrid { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:4px; }
+    .seg { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .seg button {
+      flex:1 1 auto; min-height:34px; padding:6px 10px; border-radius:var(--r-sm);
+      border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+      font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+    }
+    .seg button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+
     /* --- Buttons ------------------------------------------------- */
     .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .controls.bar { margin-top:14px; }
@@ -309,6 +335,26 @@
       triangles: 'Triângulos',
       rowsCols: 'Fiadas × colunas',
 
+      floorHoneycomb: 'Fundo em colmeia',
+      handlesCard: 'Pegas nas paredes',
+      handlesHint: 'Abre uma pega hexagonal larga perto do topo da colmeia em cada parede seleccionada.',
+      wallXP: 'Parede +X (direita)',
+      wallXN: 'Parede −X (esquerda)',
+      wallYP: 'Parede +Y (frente)',
+      wallYN: 'Parede −Y (trás)',
+      lidCard: 'Tampa',
+      withLid: 'Gerar tampa',
+      lidT: 'Espessura da tampa (mm)',
+      lidLip: 'Profundidade do encaixe (mm)',
+      lidClear: 'Folga do encaixe (mm)',
+      lidGrip: 'Furação para pega',
+      lidHoneycomb: 'Malha colmeia na tampa',
+      lidHint: 'A saia inferior entra na boca da caixa; a folga é o espaço por lado.',
+      viewBox: 'Caixa',
+      viewLid: 'Tampa',
+      viewBoth: 'Ambas',
+      downloadLid: 'Descarregar STL da tampa',
+
       download: 'Descarregar STL',
 
       warnRib: 'Uma nervura de {0} mm é fina para um bico de 0,4 mm. Acima de 1,2 mm imprime com paredes cheias.',
@@ -359,6 +405,26 @@
       weight: 'Estimated weight',
       triangles: 'Triangles',
       rowsCols: 'Rows × columns',
+
+      floorHoneycomb: 'Honeycomb floor',
+      handlesCard: 'Wall handles',
+      handlesHint: 'Cut a wide hexagonal grip near the top of the honeycomb on each selected wall.',
+      wallXP: '+X wall (right)',
+      wallXN: '−X wall (left)',
+      wallYP: '+Y wall (front)',
+      wallYN: '−Y wall (back)',
+      lidCard: 'Lid',
+      withLid: 'Generate lid',
+      lidT: 'Lid thickness (mm)',
+      lidLip: 'Nesting depth (mm)',
+      lidClear: 'Nesting clearance (mm)',
+      lidGrip: 'Finger slot',
+      lidHoneycomb: 'Honeycomb on the lid',
+      lidHint: 'The skirt underneath drops into the mouth; clearance is the gap per side.',
+      viewBox: 'Box',
+      viewLid: 'Lid',
+      viewBoth: 'Both',
+      downloadLid: 'Download lid STL',
 
       download: 'Download STL',
 
@@ -411,6 +477,26 @@
       triangles: 'Triángulos',
       rowsCols: 'Filas × columnas',
 
+      floorHoneycomb: 'Fondo de panal',
+      handlesCard: 'Asas en las paredes',
+      handlesHint: 'Abre un agarre hexagonal ancho cerca de la parte superior del panal en cada pared seleccionada.',
+      wallXP: 'Pared +X (derecha)',
+      wallXN: 'Pared −X (izquierda)',
+      wallYP: 'Pared +Y (frente)',
+      wallYN: 'Pared −Y (atrás)',
+      lidCard: 'Tapa',
+      withLid: 'Generar tapa',
+      lidT: 'Espesor de la tapa (mm)',
+      lidLip: 'Profundidad del encaje (mm)',
+      lidClear: 'Holgura del encaje (mm)',
+      lidGrip: 'Ranura para los dedos',
+      lidHoneycomb: 'Panal en la tapa',
+      lidHint: 'El faldón inferior entra en la boca de la caja; la holgura es el hueco por lado.',
+      viewBox: 'Caja',
+      viewLid: 'Tapa',
+      viewBoth: 'Ambas',
+      downloadLid: 'Descargar STL de la tapa',
+
       download: 'Descargar STL',
 
       warnRib: 'Un nervio de {0} mm es fino para una boquilla de 0,4 mm. Por encima de 1,2 mm imprime con paredes llenas.',
@@ -461,6 +547,26 @@
       weight: 'Poids estimé',
       triangles: 'Triangles',
       rowsCols: 'Rangées × colonnes',
+
+      floorHoneycomb: 'Fond en nid d’abeille',
+      handlesCard: 'Poignées murales',
+      handlesHint: 'Découpe une large prise hexagonale près du haut du nid d’abeille sur chaque paroi sélectionnée.',
+      wallXP: 'Paroi +X (droite)',
+      wallXN: 'Paroi −X (gauche)',
+      wallYP: 'Paroi +Y (avant)',
+      wallYN: 'Paroi −Y (arrière)',
+      lidCard: 'Couvercle',
+      withLid: 'Générer le couvercle',
+      lidT: 'Épaisseur du couvercle (mm)',
+      lidLip: 'Profondeur d\'emboîtement (mm)',
+      lidClear: 'Jeu d\'emboîtement (mm)',
+      lidGrip: 'Fente de préhension',
+      lidHoneycomb: 'Nid d\'abeille sur le couvercle',
+      lidHint: 'La jupe inférieure entre dans l\'ouverture ; le jeu est l\'espace par côté.',
+      viewBox: 'Boîte',
+      viewLid: 'Couvercle',
+      viewBoth: 'Les deux',
+      downloadLid: 'Télécharger le STL du couvercle',
 
       download: 'Télécharger STL',
 
@@ -513,6 +619,26 @@
       triangles: 'Dreiecke',
       rowsCols: 'Reihen × Spalten',
 
+      floorHoneycomb: 'Wabenboden',
+      handlesCard: 'Wandgriffe',
+      handlesHint: 'Schneidet einen breiten sechseckigen Griff nahe dem oberen Rand der Wabe in jede gewählte Wand.',
+      wallXP: 'Wand +X (rechts)',
+      wallXN: 'Wand −X (links)',
+      wallYP: 'Wand +Y (vorne)',
+      wallYN: 'Wand −Y (hinten)',
+      lidCard: 'Deckel',
+      withLid: 'Deckel erzeugen',
+      lidT: 'Deckelstärke (mm)',
+      lidLip: 'Einstecktiefe (mm)',
+      lidClear: 'Einsteckspiel (mm)',
+      lidGrip: 'Grifföffnung',
+      lidHoneycomb: 'Wabenmuster im Deckel',
+      lidHint: 'Die untere Schürze taucht in die Öffnung ein; das Spiel gilt je Seite.',
+      viewBox: 'Box',
+      viewLid: 'Deckel',
+      viewBoth: 'Beides',
+      downloadLid: 'Deckel-STL herunterladen',
+
       download: 'STL herunterladen',
 
       warnRib: 'Ein Steg von {0} mm ist dünn für eine 0,4-mm-Düse. Ab 1,2 mm wird er als volle Wand gedruckt.',
@@ -563,6 +689,26 @@
       weight: 'Peso stimato',
       triangles: 'Triangoli',
       rowsCols: 'File × colonne',
+
+      floorHoneycomb: 'Fondo a nido d’ape',
+      handlesCard: 'Maniglie sulle pareti',
+      handlesHint: 'Apre una presa esagonale larga vicino alla cima del nido d’ape su ogni parete selezionata.',
+      wallXP: 'Parete +X (destra)',
+      wallXN: 'Parete −X (sinistra)',
+      wallYP: 'Parete +Y (fronte)',
+      wallYN: 'Parete −Y (retro)',
+      lidCard: 'Coperchio',
+      withLid: 'Genera coperchio',
+      lidT: 'Spessore coperchio (mm)',
+      lidLip: 'Profondità dell\'incastro (mm)',
+      lidClear: 'Gioco dell\'incastro (mm)',
+      lidGrip: 'Asola per le dita',
+      lidHoneycomb: 'Nido d\'ape sul coperchio',
+      lidHint: 'La gonna inferiore entra nella bocca della scatola; il gioco è per lato.',
+      viewBox: 'Scatola',
+      viewLid: 'Coperchio',
+      viewBoth: 'Entrambi',
+      downloadLid: 'Scarica STL del coperchio',
 
       download: 'Scarica STL',
 
@@ -615,6 +761,26 @@
       triangles: '三角形',
       rowsCols: '行 × 列',
 
+      floorHoneycomb: '蜂窝底板',
+      handlesCard: '侧壁提手',
+      handlesHint: '在所选侧壁蜂窝靠上的位置开出较宽的六角提手孔。',
+      wallXP: '+X 壁（右）',
+      wallXN: '−X 壁（左）',
+      wallYP: '+Y 壁（前）',
+      wallYN: '−Y 壁（后）',
+      lidCard: '盖子',
+      withLid: '生成盖子',
+      lidT: '盖厚（mm）',
+      lidLip: '嵌合深度（mm）',
+      lidClear: '嵌合间隙（mm）',
+      lidGrip: '提手开孔',
+      lidHoneycomb: '盖子蜂巢网格',
+      lidHint: '底部裙边嵌入箱口，间隙为每边预留的空隙。',
+      viewBox: '盒体',
+      viewLid: '盖子',
+      viewBoth: '两者',
+      downloadLid: '下载盖子 STL',
+
       download: '下载 STL',
 
       warnRib: '{0} mm 的筋对 0.4 mm 喷嘴来说偏薄。超过 1.2 mm 会打成实心壁。',
@@ -666,6 +832,26 @@
       triangles: '三角形',
       rowsCols: '行 × 列',
 
+      floorHoneycomb: 'ハニカム底',
+      handlesCard: '壁の取っ手',
+      handlesHint: '選択した壁のハニカム上部付近に、幅広の六角取っ手穴を開けます。',
+      wallXP: '+X 壁（右）',
+      wallXN: '−X 壁（左）',
+      wallYP: '+Y 壁（前）',
+      wallYN: '−Y 壁（後）',
+      lidCard: 'ふた',
+      withLid: 'ふたを生成',
+      lidT: 'ふたの厚さ（mm）',
+      lidLip: 'はめ込み深さ（mm）',
+      lidClear: 'はめ込みのすき間（mm）',
+      lidGrip: '指かけ穴',
+      lidHoneycomb: 'ふたのハニカム',
+      lidHint: '下側のスカートが箱の口に入ります。すき間は片側あたりの値です。',
+      viewBox: '本体',
+      viewLid: 'ふた',
+      viewBoth: '両方',
+      downloadLid: 'ふたの STL をダウンロード',
+
       download: 'STL をダウンロード',
 
       warnRib: '{0} mm のリブは 0.4 mm ノズルには細いです。1.2 mm 超えると中実の壁として印刷されます。',
@@ -701,7 +887,15 @@
         cell: 10, rib: 4 / 3,
         rowKeep: 0.3,        // smallest surviving fraction of a clipped opening
         cornerSteps: 20,     // samples per corner arc
-        blendSteps: 5        // extra samples at each end of a straight run
+        blendSteps: 5,       // extra samples at each end of a straight run
+        floorHoneycomb: false,
+        handleXP: false, handleXN: false, handleYP: false, handleYN: false,
+        withLid: false,
+        lidT: 2.5,           // lid plate thickness
+        lidLip: 4,           // how deep the skirt drops into the mouth
+        lidClear: 0.3,       // gap per side between skirt and cavity
+        lidGrip: false,      // finger slot through the lid
+        lidHoneycomb: false  // honeycomb through the lid
       };
 
       function num(v, d) { var x = parseFloat(v); return isFinite(x) ? x : d; }
@@ -741,6 +935,11 @@
         var bandBottom = floorTop + baseH;
 
         var holeAF = cell - rib;
+        var lidT = clamp(num(o.lidT, D.lidT), 1, 12);
+        // The skirt may reach past the rim into the perforated band, but it
+        // must stop short of the floor.
+        var lidLip = clamp(num(o.lidLip, D.lidLip), 0, Math.min(boxZ - floorTop - 1, 20));
+        var lidClear = clamp(num(o.lidClear, D.lidClear), 0, 1.5);
 
         var P = {
           boxX: boxX, boxY: boxY, boxZ: boxZ,
@@ -756,6 +955,12 @@
           holeHH: holeAF / 2,         // half its height
           colPitch: cell * SQRT3 / 2,
           slotPitch: cell / 2,
+          floorHoneycomb: !!o.floorHoneycomb,
+          handleXP: !!o.handleXP, handleXN: !!o.handleXN,
+          handleYP: !!o.handleYP, handleYN: !!o.handleYN,
+          withLid: !!o.withLid,
+          lidT: lidT, lidLip: lidLip, lidClear: lidClear,
+          lidGrip: !!o.lidGrip, lidHoneycomb: !!o.lidHoneycomb,
           valid: true
         };
 
@@ -810,7 +1015,7 @@
         var ax = hx - r, ay = hy - r, st = P.cornerSteps;
         var pts = [], runs = [];
 
-        function run(from, to) {
+        function run(from, to, wall) {
           var dx = to[0] - from[0], dy = to[1] - from[1];
           var len = Math.sqrt(dx * dx + dy * dy);
           var offs = runOffsets(len, P.wall, P.blendSteps), i, f;
@@ -819,7 +1024,7 @@
             f = offs[i] / len;
             pts.push([from[0] + dx * f, from[1] + dy * f]);
           }
-          runs.push({ i0: i0, i1: pts.length - 1 });
+          runs.push({ i0: i0, i1: pts.length - 1, wall: wall });
         }
         // Corner endpoints are already on the runs either side of it.
         function corner(cx, cy, sx, sy, reverse) {
@@ -827,17 +1032,21 @@
           for (i = 1; i < a.length - 1; i++) pts.push(a[i]);
         }
 
-        run([hx, -ay], [hx, ay]);        corner(ax, ay, 1, 1, false);
-        run([ax, hy], [-ax, hy]);        corner(-ax, ay, -1, 1, true);
-        run([-hx, ay], [-hx, -ay]);      corner(-ax, -ay, -1, -1, false);
-        run([-ax, -hy], [ax, -hy]);      corner(ax, -ay, 1, -1, true);
+        run([hx, -ay], [hx, ay], 'xp');        corner(ax, ay, 1, 1, false);
+        run([ax, hy], [-ax, hy], 'yp');        corner(-ax, ay, -1, 1, true);
+        run([-hx, ay], [-hx, -ay], 'xn');      corner(-ax, -ay, -1, -1, false);
+        run([-ax, -hy], [ax, -hy], 'yn');      corner(ax, -ay, 1, -1, true);
 
         // Rotate the seam into the middle of that last corner.
         var N = pts.length, k = N - Math.ceil((st - 1) / 2), i;
         var rot = [];
         for (i = 0; i < N; i++) rot.push(pts[(i + k) % N]);
         for (i = 0; i < runs.length; i++) {
-          runs[i] = { i0: (runs[i].i0 - k + N) % N, i1: (runs[i].i1 - k + N) % N };
+          runs[i] = {
+            i0: (runs[i].i0 - k + N) % N,
+            i1: (runs[i].i1 - k + N) % N,
+            wall: runs[i].wall
+          };
         }
         return { pts: rot, runs: runs };
       }
@@ -1045,20 +1254,20 @@
           return [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, z];
         }
 
+
         // --- openings ------------------------------------------------
         var rows = rowSlots(P), holes = [], nCols = 0, r, k, m;
-        // Whatever is left of the perimeter once the four straight runs are
-        // taken off is the four corners.
         var straight = 0;
         for (r = 0; r < loop.runs.length; r++) straight += S[loop.runs[r].i1] - S[loop.runs[r].i0];
         var cornerLen = Math.max(0, total - straight) / 4;
 
+        var wantHandle = {
+          xp: P.handleXP, xn: P.handleXN, yp: P.handleYP, yn: P.handleYN
+        };
+
         for (r = 0; r < loop.runs.length; r++) {
           var s0 = S[loop.runs[r].i0], s1 = S[loop.runs[r].i1];
           var half = (s1 - s0) / 2, mid = (s0 + s1) / 2;
-          // A column belongs to the wall its centre falls on, and its opening
-          // may lean into the corner but never past the middle of it, or two
-          // walls would be cutting into the same piece of material.
           var nj = Math.min(Math.floor(half / P.colPitch),
                             Math.floor((half + cornerLen / 2 - P.holeR) / P.colPitch));
           nCols = Math.max(nCols, 2 * nj + 1);
@@ -1066,38 +1275,68 @@
             for (k = 0; k < rows.length; k++) {
               m = rows[k].m;
               if ((((j - m) % 2) + 2) % 2 !== 0) continue;
-              holes.push({ s: mid + j * P.colPitch, z: rows[k].z });
+              holes.push({ kind: 'hex', s: mid + j * P.colPitch, z: rows[k].z });
+            }
+          }
+          // Wide hexagonal grip near the top of the honeycomb band.
+          if (wantHandle[loop.runs[r].wall] && half > 18 && P.band > 16) {
+            var hR = Math.min(P.holeR * 2.4, half * 0.5, 22);
+            var hHH = hR * 0.5; // flat-top hex half-height
+            var hZ = P.rimBottom - hHH - 1.5;
+            if (hZ - hHH > P.bandBottom + 0.8) {
+              holes.push({ kind: 'handle', s: mid, z: hZ, R: hR, hh: hHH });
             }
           }
         }
+        // Drop honeycomb cells that collide with a grip opening.
+        function overlaps(a, b) {
+          var ra = a.kind === 'handle' ? a.R : P.holeR;
+          var rb = b.kind === 'handle' ? b.R : P.holeR;
+          var ha = a.kind === 'handle' ? a.hh : P.holeHH;
+          var hb = b.kind === 'handle' ? b.hh : P.holeHH;
+          return Math.abs(a.s - b.s) < ra + rb - 0.2 && Math.abs(a.z - b.z) < ha + hb - 0.2;
+        }
+        var cleaned = [], iH, iG, skip;
+        for (iH = 0; iH < holes.length; iH++) {
+          if (holes[iH].kind === 'handle') { cleaned.push(holes[iH]); continue; }
+          skip = false;
+          for (iG = 0; iG < holes.length; iG++) {
+            if (holes[iG].kind !== 'handle') continue;
+            if (overlaps(holes[iH], holes[iG])) { skip = true; break; }
+          }
+          if (!skip) cleaned.push(holes[iH]);
+        }
+        holes = cleaned;
         holes.sort(function (a, b) { return a.s - b.s; });
 
-        var R = P.holeR, hh = P.holeHH, lo = P.bandBottom, hi = P.rimBottom;
-        function halfWidth(hz, z) { return R * (1 - 0.5 * Math.abs(z - hz) / hh); }
+        var R = P.holeR, hh = P.holeHH;
+        var lo = P.bandBottom, hi = P.rimBottom;
+
+        function holeR(h) { return h.kind === 'handle' ? h.R : R; }
+        function holeHH(h) { return h.kind === 'handle' ? h.hh : hh; }
+        function holeHalfW(h, z) {
+          return holeR(h) * (1 - 0.5 * Math.abs(z - h.z) / holeHH(h));
+        }
+        function holeZ0(h) { return h.z - holeHH(h); }
+        function holeZ1(h) { return h.z + holeHH(h); }
 
         // --- extra outline samples -----------------------------------
-        // An opening's flat top and bottom, and any edge the floor or the rim
-        // slices it along, end at an arc length the outline knows nothing
-        // about. Adding those arc lengths as samples means the solid wall
-        // beyond them is cut at the same places, so the two sides of the join
-        // share an edge rather than leaving one hanging over the other.
         var splits = [], w;
         for (k = 0; k < holes.length; k++) {
-          splits.push(holes[k].s - R / 2, holes[k].s + R / 2);
-          if (holes[k].z - hh < lo) {
-            w = halfWidth(holes[k].z, lo);
-            splits.push(holes[k].s - w, holes[k].s + w);
+          var h0 = holes[k];
+          splits.push(h0.s - holeR(h0) / 2, h0.s + holeR(h0) / 2);
+          var zLo = Math.max(holeZ0(h0), lo);
+          var zHi = Math.min(holeZ1(h0), hi);
+          if (holeZ0(h0) < lo) {
+            w = holeHalfW(h0, lo);
+            splits.push(h0.s - w, h0.s + w);
           }
-          if (holes[k].z + hh > hi) {
-            w = halfWidth(holes[k].z, hi);
-            splits.push(holes[k].s - w, holes[k].s + w);
+          if (holeZ1(h0) > hi) {
+            w = holeHalfW(h0, hi);
+            splits.push(h0.s - w, h0.s + w);
           }
         }
         if (splits.length) {
-          // Marks outrank plain outline samples when the two land on top of
-          // one another: a face edge stops at the mark, so that is where the
-          // vertex has to be. Samples closer together than this would only
-          // make slivers anyway.
           var MERGE = 0.005, marks = [[0, 2]];
           for (i = 1; i < N; i++) marks.push([S[i], 0]);
           for (i = 0; i < splits.length; i++) {
@@ -1123,8 +1362,6 @@
                      inner[kk][1] + (inner[(kk + 1) % N][1] - inner[kk][1]) * f]);
             ns.push(kept[i][0]);
           }
-          // New points sit on the chords they split, so the arc lengths carry
-          // over unchanged.
           outer = no; inner = ni; N = ns.length;
           S = new Float64Array(N + 1);
           for (i = 0; i < N; i++) S[i] = ns[i];
@@ -1135,15 +1372,16 @@
 
         // --- wall faces ----------------------------------------------
         var evts = [lo, hi];
-        for (k = 0; k < rows.length; k++) {
-          evts.push(clamp(rows[k].z - hh, lo, hi), clamp(rows[k].z, lo, hi), clamp(rows[k].z + hh, lo, hi));
+        for (k = 0; k < holes.length; k++) {
+          var cLo = lo, cHi = hi;
+          evts.push(clamp(holeZ0(holes[k]), cLo, cHi),
+                    clamp(holes[k].z, cLo, cHi),
+                    clamp(holeZ1(holes[k]), cLo, cHi));
         }
         evts.sort(function (a, b) { return a - b; });
         var zs = [evts[0]];
         for (i = 1; i < evts.length; i++) if (evts[i] - zs[zs.length - 1] > 1e-7) zs.push(evts[i]);
 
-        // Emit one convex piece of wall face, split at the outline samples so
-        // every triangle stays inside a single straight segment of the sweep.
         function face(poly) {
           if (poly.length < 3) return;
           var smin = Infinity, smax = -Infinity, p;
@@ -1170,13 +1408,13 @@
           var za = zs[i], zb = zs[i + 1], zm = (za + zb) / 2;
           if (zb - za < 1e-7) continue;
 
-          // Openings crossed by this strip, left to right.
           var cut = [];
           for (k = 0; k < holes.length; k++) {
-            var hz = holes[k].z;
-            if (zm <= Math.max(hz - hh, lo) || zm >= Math.min(hz + hh, hi)) continue;
-            cut.push([holes[k].s - halfWidth(hz, za), holes[k].s + halfWidth(hz, za),
-                      holes[k].s - halfWidth(hz, zb), holes[k].s + halfWidth(hz, zb)]);
+            var h1 = holes[k];
+            var cLo = lo, cHi = hi;
+            if (zm <= Math.max(holeZ0(h1), cLo) || zm >= Math.min(holeZ1(h1), cHi)) continue;
+            cut.push([h1.s - holeHalfW(h1, za), h1.s + holeHalfW(h1, za),
+                      h1.s - holeHalfW(h1, zb), h1.s + holeHalfW(h1, zb)]);
           }
 
           var la = 0, lb = 0;
@@ -1192,16 +1430,17 @@
 
         // --- opening side walls --------------------------------------
         for (k = 0; k < holes.length; k++) {
-          var sc = holes[k].s, zc = holes[k].z;
-          var hex = [[sc + R, zc], [sc + R / 2, zc + hh], [sc - R / 2, zc + hh],
-                     [sc - R, zc], [sc - R / 2, zc - hh], [sc + R / 2, zc - hh]];
-          hex = clipZ(clipZ(hex, lo, true), hi, false);
-          for (i = 0; i < hex.length; i++) {
-            var a = hex[i], b = hex[(i + 1) % hex.length];
-            // Split the edge wherever it crosses into the next segment of the
-            // sweep, so the wall of the opening follows the outline too, and
-            // wherever a strip boundary crosses it, so it is cut into the same
-            // pieces as the wall face it borders.
+          var h2 = holes[k];
+          var cLo2 = lo, cHi2 = hi;
+          var ring;
+          {
+            var r2 = holeR(h2), hh2 = holeHH(h2);
+            ring = [[h2.s + r2, h2.z], [h2.s + r2 / 2, h2.z + hh2], [h2.s - r2 / 2, h2.z + hh2],
+                    [h2.s - r2, h2.z], [h2.s - r2 / 2, h2.z - hh2], [h2.s + r2 / 2, h2.z - hh2]];
+          }
+          ring = clipZ(clipZ(ring, cLo2, true), cHi2, false);
+          for (i = 0; i < ring.length; i++) {
+            var a = ring[i], b = ring[(i + 1) % ring.length];
             var ka = segAt(Math.min(a[0], b[0])), kb = segAt(Math.max(a[0], b[0])), cuts = [0], t;
             if (Math.abs(b[0] - a[0]) > 1e-12) {
               for (m = ka + 1; m <= kb; m++) {
@@ -1217,9 +1456,6 @@
             }
             cuts.push(1);
             cuts.sort(function (x, y) { return x - y; });
-            // A hole clipped by a rim puts its cut edge at the same arc length
-            // as the strip boundary that clipped it, so the two cuts can land
-            // on the same spot and leave a zero-width quad behind.
             var uniq = [cuts[0]];
             for (m = 1; m < cuts.length; m++) {
               if (cuts[m] - uniq[uniq.length - 1] > 1e-10) uniq.push(cuts[m]);
@@ -1243,7 +1479,6 @@
                    [loB[j2][0], loB[j2][1], zB2], [loB[i2][0], loB[i2][1], zB2]);
           }
         }
-        // A flat lid over a closed loop, fanned from its centroid.
         function cap(lp, z, up) {
           var cx = 0, cy = 0, i2, j2;
           for (i2 = 0; i2 < N; i2++) { cx += lp[i2][0]; cy += lp[i2][1]; }
@@ -1254,21 +1489,130 @@
             else s.tri([cx, cy, z], [lp[j2][0], lp[j2][1], z], [lp[i2][0], lp[i2][1], z]);
           }
         }
+        function capAnnulus(outerLp, innerLp, z, up) {
+          var i2, j2;
+          for (i2 = 0; i2 < N; i2++) {
+            j2 = (i2 + 1) % N;
+            if (up) {
+              s.quad([outerLp[i2][0], outerLp[i2][1], z], [outerLp[j2][0], outerLp[j2][1], z],
+                     [innerLp[j2][0], innerLp[j2][1], z], [innerLp[i2][0], innerLp[i2][1], z]);
+            } else {
+              s.quad([outerLp[i2][0], outerLp[i2][1], z], [innerLp[i2][0], innerLp[i2][1], z],
+                     [innerLp[j2][0], innerLp[j2][1], z], [outerLp[j2][0], outerLp[j2][1], z]);
+            }
+          }
+        }
+
+        // Honeycomb through the flat floor plate (z = 0 .. floorT).
+        function floorPlateLimits() {
+          return {
+            x: P.boxX / 2 - P.wall - P.floorChamfer,
+            y: P.boxY / 2 - P.wall - P.floorChamfer
+          };
+        }
+        function floorHolesXY(lim) {
+          var margin = P.holeR + P.rib * 0.55 + 0.6;
+          var limX = lim.x - margin, limY = lim.y - margin;
+          if (limX < P.holeR || limY < P.holeHH) return [];
+          var out = [], jj, mm, x, y;
+          var nj2 = Math.floor(limX / P.colPitch) + 1;
+          var nm2 = Math.floor(limY / P.slotPitch) + 1;
+          for (jj = -nj2; jj <= nj2; jj++) {
+            for (mm = -nm2; mm <= nm2; mm++) {
+              if ((((jj - mm) % 2) + 2) % 2 !== 0) continue;
+              x = jj * P.colPitch;
+              y = mm * P.slotPitch;
+              if (Math.abs(x) + P.holeR > limX || Math.abs(y) + P.holeHH > limY) continue;
+              out.push({ x: x, y: y });
+            }
+          }
+          return out;
+        }
+        // Same vertex count as the outer outline, walked around a rectangle so
+        // the annulus helpers can join the perforated plate to the footprint.
+        function rectLoop(lx, ly) {
+          var per = 2 * (2 * lx + 2 * ly), out = [], i, d, t;
+          for (i = 0; i < N; i++) {
+            t = (i / N) * per;
+            if (t <= 2 * ly) { out.push([lx, -ly + t]); continue; }
+            t -= 2 * ly;
+            if (t <= 2 * lx) { out.push([lx - t, ly]); continue; }
+            t -= 2 * lx;
+            if (t <= 2 * ly) { out.push([-lx, ly - t]); continue; }
+            t -= 2 * ly;
+            out.push([-lx + t, -ly]);
+          }
+          return out;
+        }
+
+        function perforatedFloor(floorHoles, lim, plate, zBot, zTop) {
+          var hiF = P.holeHH, i2, e, a2, b2, idx, tris, vi;
+          if (typeof earcut !== 'function') {
+            // Nothing can triangulate the perforated plate, so leave it solid
+            // rather than punch openings that have no face around them.
+            cap(plate, zBot, false);
+            cap(plate, zTop, true);
+            return;
+          }
+          // Side walls through the plate.
+          for (i2 = 0; i2 < floorHoles.length; i2++) {
+            var hx = floorHoles[i2].x, hy = floorHoles[i2].y;
+            var hex = [[hx + R, hy], [hx + R / 2, hy + hiF], [hx - R / 2, hy + hiF],
+                       [hx - R, hy], [hx - R / 2, hy - hiF], [hx + R / 2, hy - hiF]];
+            for (e = 0; e < 6; e++) {
+              a2 = hex[e]; b2 = hex[(e + 1) % 6];
+              s.quad([a2[0], a2[1], zTop], [b2[0], b2[1], zTop],
+                     [b2[0], b2[1], zBot], [a2[0], a2[1], zBot]);
+            }
+          }
+          // Flatten plate (CCW) + holes (CW) for earcut.
+          var flat = [], holesIdx = [], i3;
+          for (i2 = 0; i2 < plate.length; i2++) flat.push(plate[i2][0], plate[i2][1]);
+          for (i2 = 0; i2 < floorHoles.length; i2++) {
+            holesIdx.push(flat.length / 2);
+            hx = floorHoles[i2].x; hy = floorHoles[i2].y;
+            // Clockwise hex so earcut treats it as a hole.
+            var hxv = [[hx + R, hy], [hx + R / 2, hy - hiF], [hx - R / 2, hy - hiF],
+                       [hx - R, hy], [hx - R / 2, hy + hiF], [hx + R / 2, hy + hiF]];
+            for (i3 = 0; i3 < 6; i3++) flat.push(hxv[i3][0], hxv[i3][1]);
+          }
+          tris = earcut(flat, holesIdx, 2);
+          function vert(i) { return [flat[i * 2], flat[i * 2 + 1]]; }
+          for (i2 = 0; i2 < tris.length; i2 += 3) {
+            var pa = vert(tris[i2]), pb = vert(tris[i2 + 1]), pc = vert(tris[i2 + 2]);
+            s.tri([pa[0], pa[1], zTop], [pb[0], pb[1], zTop], [pc[0], pc[1], zTop]);
+            s.tri([pa[0], pa[1], zBot], [pc[0], pc[1], zBot], [pb[0], pb[1], zBot]);
+          }
+        }
 
         var footprint = offsetLoop(outer, nrm, P.baseChamfer);
         var floorPad = offsetLoop(inner, innerNrm, P.floorChamfer);
         var rimFlat = offsetLoop(inner, innerNrm, -P.rimChamfer);
 
-        // Base, wall and rim are one surface, not three solids piled up: the
-        // rings where they meet carry no faces at all, because the wall picks
-        // the outline up at exactly the height the base leaves it at.
-        cap(footprint, 0, false);
         band(footprint, 0, outer, P.baseChamfer);
         band(outer, P.baseChamfer, outer, lo);
-        // Inside face of the bottom rim, when there is one to show.
         if (lo - P.floorTop > 1e-7) band(inner, lo, inner, P.floorTop);
-        band(inner, P.floorTop, floorPad, P.floorT);
-        cap(floorPad, P.floorT, true);
+
+        var floorHoleCount = 0;
+        if (P.floorHoneycomb) {
+          var lim = floorPlateLimits();
+          var plate = rectLoop(lim.x, lim.y);
+          var fHoles = floorHolesXY(lim);
+          floorHoleCount = fHoles.length;
+          // Chamfer down onto the rectangular plate, solid outer ring underneath,
+          // honeycomb punched through the plate.
+          band(inner, P.floorTop, plate, P.floorT);
+          capAnnulus(footprint, plate, 0, false);
+          if (fHoles.length) perforatedFloor(fHoles, lim, plate, 0, P.floorT);
+          else {
+            cap(plate, 0, false);
+            cap(plate, P.floorT, true);
+          }
+        } else {
+          band(inner, P.floorTop, floorPad, P.floorT);
+          cap(footprint, 0, false);
+          cap(floorPad, P.floorT, true);
+        }
 
         // Rim: solid band with a funnel chamfer on the inside of the mouth.
         band(outer, hi, outer, P.boxZ);
@@ -1280,6 +1624,7 @@
         return {
           v: v,
           holes: holes.length,
+          floorHoles: floorHoleCount,
           rows: rows.length,
           cols: nCols,
           area: shoelace(inner),
@@ -1336,7 +1681,202 @@
         return new Uint8Array(buf);
       }
 
-      root.BoxEngine = { DEFAULTS: D, compute: compute, build: build, toStl: toStl };
+
+      // Cavity outline pulled in by d on every side. Generated from scratch
+      // rather than offset from the wall, because offsetting a tight corner by
+      // more than its own radius folds the outline in on itself.
+      function lidLoop(P, d, steps) {
+        var hx = P.boxX / 2 - P.wall - d, hy = P.boxY / 2 - P.wall - d;
+        var r = Math.max(0.4, Math.min(P.cornerR, hx - 0.3, hy - 0.3));
+        var n = P.cornerN, ax = hx - r, ay = hy - r, pts = [];
+        function corner(cx, cy, sx, sy, reverse) {
+          var a = arcPts(cx, cy, sx, sy, r, n, steps, reverse), i;
+          for (i = 0; i < a.length - 1; i++) pts.push(a[i]);
+        }
+        pts.push([hx, -ay]);   corner(ax, ay, 1, 1, false);
+        pts.push([ax, hy]);    corner(-ax, ay, -1, 1, true);
+        pts.push([-hx, ay]);   corner(-ax, -ay, -1, -1, false);
+        pts.push([-ax, -hy]);  corner(ax, -ay, 1, -1, true);
+        return pts;
+      }
+
+      // A lid that drops into the mouth of the box: one solid plate with a
+      // skirt underneath shaped to the cavity, optionally punched through with
+      // the same honeycomb and with a slot to lift it off by.
+      function buildLid(P) {
+        var s = soup();
+        var outer = outerLoop(P).pts;
+        var t = P.lidT;
+        var hasEarcut = typeof earcut === 'function';
+
+        // The skirt is a thin wall so the lid stays light while still keying
+        // into the mouth; it needs earcut to close its rings.
+        var skirtW = Math.max(1.2, Math.min(P.wall * 0.7, 2.4));
+        var room = Math.min(P.boxX, P.boxY) / 2 - P.wall - P.lidClear - skirtW;
+        var lipH = (hasEarcut && P.lidLip > 0.2 && room > 2) ? P.lidLip : 0;
+        var skirtOut = lipH ? lidLoop(P, P.lidClear, P.cornerSteps) : null;
+        var skirtIn = lipH ? lidLoop(P, P.lidClear + skirtW, P.cornerSteps) : null;
+        // Openings must clear the skirt, or the plate edge when there is none.
+        var bound = skirtIn || lidLoop(P, P.lidClear, P.cornerSteps);
+        var roomy = Math.min(P.boxX, P.boxY) / 2 - P.wall - P.lidClear - (lipH ? skirtW : 0) > 2;
+
+        function fan(lp, z, up) {
+          var n = lp.length, cx = 0, cy = 0, i, j;
+          for (i = 0; i < n; i++) { cx += lp[i][0]; cy += lp[i][1]; }
+          cx /= n; cy /= n;
+          for (i = 0; i < n; i++) {
+            j = (i + 1) % n;
+            if (up) s.tri([cx, cy, z], [lp[i][0], lp[i][1], z], [lp[j][0], lp[j][1], z]);
+            else s.tri([cx, cy, z], [lp[j][0], lp[j][1], z], [lp[i][0], lp[i][1], z]);
+          }
+        }
+        // Vertical skin around a closed outline, facing out of the solid.
+        function skin(lp, zLow, zHigh, outward) {
+          var n = lp.length, i, j, a, b;
+          for (i = 0; i < n; i++) {
+            j = (i + 1) % n; a = lp[i]; b = lp[j];
+            if (outward) s.quad([a[0], a[1], zLow], [b[0], b[1], zLow],
+                                [b[0], b[1], zHigh], [a[0], a[1], zHigh]);
+            else s.quad([a[0], a[1], zHigh], [b[0], b[1], zHigh],
+                        [b[0], b[1], zLow], [a[0], a[1], zLow]);
+          }
+        }
+        // Flat face at height z: everything inside lp except the given cutouts.
+        function plane(lp, cuts, z, up) {
+          if (!cuts.length) { fan(lp, z, up); return; }
+          var flat = [], idx = [], m, q, a, b, c;
+          for (m = 0; m < lp.length; m++) flat.push(lp[m][0], lp[m][1]);
+          for (m = 0; m < cuts.length; m++) {
+            idx.push(flat.length / 2);
+            // Reversed, so earcut reads the outline as a hole.
+            for (q = cuts[m].length - 1; q >= 0; q--) flat.push(cuts[m][q][0], cuts[m][q][1]);
+          }
+          var tri = earcut(flat, idx, 2);
+          function pt(i) { return [flat[i * 2], flat[i * 2 + 1]]; }
+          for (m = 0; m < tri.length; m += 3) {
+            a = pt(tri[m]); b = pt(tri[m + 1]); c = pt(tri[m + 2]);
+            if (up) s.tri([a[0], a[1], z], [b[0], b[1], z], [c[0], c[1], z]);
+            else s.tri([a[0], a[1], z], [c[0], c[1], z], [b[0], b[1], z]);
+          }
+        }
+
+        // --- where an opening is allowed to sit --------------------------
+        function inBound(x, y) {
+          var hit = false, i, j, xi, yi, xj, yj;
+          for (i = 0, j = bound.length - 1; i < bound.length; j = i++) {
+            xi = bound[i][0]; yi = bound[i][1];
+            xj = bound[j][0]; yj = bound[j][1];
+            if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) hit = !hit;
+          }
+          return hit;
+        }
+        function clearOf(x, y, r) {
+          var n = bound.length, i, j, ax, ay, dx, dy, u, px, py;
+          if (!inBound(x, y)) return false;
+          for (i = 0, j = n - 1; i < n; j = i++) {
+            ax = bound[j][0]; ay = bound[j][1];
+            dx = bound[i][0] - ax; dy = bound[i][1] - ay;
+            u = dx * dx + dy * dy;
+            u = u > 1e-12 ? ((x - ax) * dx + (y - ay) * dy) / u : 0;
+            u = u < 0 ? 0 : (u > 1 ? 1 : u);
+            px = x - (ax + dx * u); py = y - (ay + dy * u);
+            if (px * px + py * py < r * r) return false;
+          }
+          return true;
+        }
+        function fits(poly, r) {
+          var i;
+          for (i = 0; i < poly.length; i++) {
+            if (!clearOf(poly[i][0], poly[i][1], r)) return false;
+          }
+          return true;
+        }
+        function bbox(poly) {
+          var b = [Infinity, Infinity, -Infinity, -Infinity], i;
+          for (i = 0; i < poly.length; i++) {
+            if (poly[i][0] < b[0]) b[0] = poly[i][0];
+            if (poly[i][1] < b[1]) b[1] = poly[i][1];
+            if (poly[i][0] > b[2]) b[2] = poly[i][0];
+            if (poly[i][1] > b[3]) b[3] = poly[i][1];
+          }
+          return b;
+        }
+        // Counter-clockwise stadium, long axis along y when alongY is set.
+        function slot(len, w, alongY) {
+          var r = w / 2, half = Math.max(0.01, len / 2 - r);
+          var steps = 14, out = [], i, a, p;
+          for (i = 0; i <= steps; i++) {
+            a = -Math.PI / 2 + Math.PI * i / steps;
+            out.push([half + r * Math.cos(a), r * Math.sin(a)]);
+          }
+          for (i = 0; i <= steps; i++) {
+            a = Math.PI / 2 + Math.PI * i / steps;
+            out.push([-half + r * Math.cos(a), r * Math.sin(a)]);
+          }
+          // Quarter turn rather than a swap, which would flip the winding.
+          if (alongY) {
+            for (i = 0; i < out.length; i++) { p = out[i]; out[i] = [-p[1], p[0]]; }
+          }
+          return out;
+        }
+
+        // --- openings ----------------------------------------------------
+        var holes = [], gripBox = null, i, j, k;
+
+        if (hasEarcut && roomy && P.lidGrip) {
+          var alongY = P.boxY >= P.boxX;
+          var lng = alongY ? P.boxY : P.boxX, srt = alongY ? P.boxX : P.boxY;
+          var gw = clamp(srt * 0.13, 11, 26);
+          var gl = clamp(lng * 0.3, gw + 14, lng * 0.5);
+          // Shrink until the slot clears the skirt, or drop it altogether.
+          for (k = 0; k < 12 && !gripBox; k++) {
+            var cand = slot(gl, gw, alongY);
+            if (fits(cand, 1.4)) { holes.push(cand); gripBox = bbox(cand); }
+            else { gl *= 0.86; gw = Math.max(7, gw * 0.9); }
+          }
+        }
+
+        if (hasEarcut && roomy && P.lidHoneycomb) {
+          var b = bbox(bound), pad = P.rib;
+          var nj = Math.floor(b[2] / P.colPitch) + 1;
+          var nm = Math.floor(b[3] / P.slotPitch) + 1;
+          for (j = -nj; j <= nj; j++) {
+            for (k = -nm; k <= nm; k++) {
+              if ((((j - k) % 2) + 2) % 2 !== 0) continue;
+              var hx = j * P.colPitch, hy = k * P.slotPitch;
+              if (gripBox &&
+                  hx + P.holeR > gripBox[0] - pad && hx - P.holeR < gripBox[2] + pad &&
+                  hy + P.holeHH > gripBox[1] - pad && hy - P.holeHH < gripBox[3] + pad) continue;
+              if (!clearOf(hx, hy, P.holeR + pad * 0.55 + 0.6)) continue;
+              holes.push([[hx + P.holeR, hy], [hx + P.holeR / 2, hy + P.holeHH],
+                          [hx - P.holeR / 2, hy + P.holeHH], [hx - P.holeR, hy],
+                          [hx - P.holeR / 2, hy - P.holeHH], [hx + P.holeR / 2, hy - P.holeHH]]);
+            }
+          }
+        }
+
+        // --- solid --------------------------------------------------------
+        plane(outer, holes, t, true);
+        skin(outer, 0, t, true);
+        if (lipH) {
+          plane(outer, [skirtOut], 0, false);
+          skin(skirtOut, -lipH, 0, true);
+          plane(skirtOut, [skirtIn], -lipH, false);
+          skin(skirtIn, -lipH, 0, false);
+          plane(skirtIn, holes, 0, false);
+        } else {
+          plane(outer, holes, 0, false);
+        }
+        for (i = 0; i < holes.length; i++) {
+          skin(holes[i], 0, t, false);
+        }
+
+        var v = s.done();
+        return { v: v, volume: volumeOf(v), holes: holes.length };
+      }
+
+      root.BoxEngine = { DEFAULTS: D, compute: compute, build: build, buildLid: buildLid, toStl: toStl };
+
     })(typeof window !== 'undefined' ? window : this);
   </script>
 </head>
@@ -1421,6 +1961,16 @@
         type: 'number', value: p.value, min: p.min, max: p.max, step: p.step || 1,
         onChange: function (e) { p.onChange(e.target.value); }
       });
+    }
+
+    function Check(p) {
+      return h('div', { className: 'checkline' },
+        h('input', {
+          type: 'checkbox', id: p.id, checked: !!p.checked,
+          onChange: function (e) { p.onChange(e.target.checked); }
+        }),
+        h('label', { htmlFor: p.id }, p.label)
+      );
     }
 
     function Select(p) {
@@ -1662,56 +2212,87 @@
       var st = React.useState({
         boxX: 100, boxY: 200, boxZ: 64,
         wall: 3, floorT: 3, baseH: 7, rimH: 7, cornerR: 10,
-        cell: 10, rib: 1.333
+        cell: 10, rib: 1.333,
+        floorHoneycomb: false,
+        handleXP: false, handleXN: false, handleYP: false, handleYN: false,
+        withLid: false, lidT: 2.5, lidLip: 4, lidClear: 0.3,
+        lidGrip: false, lidHoneycomb: false
       });
       var o = st[0], setO = st[1];
       function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
 
       var stColor = React.useState('#5b6470'); var colour = stColor[0], setColour = stColor[1];
+      var stView = React.useState('box'); var view = stView[0], setView = stView[1];
 
       var P = React.useMemo(function () { return BE.compute(o); }, [o]);
       var model = React.useMemo(function () {
         return P.valid ? BE.build(P) : null;
       }, [P]);
+      var lidModel = React.useMemo(function () {
+        return P.valid && P.withLid ? BE.buildLid(P) : null;
+      }, [P]);
 
       var stage = useStage3D({ azimuth: 0.85, polar: 1.02, distance: 3.2, min: 0.9, max: 14 });
       var meshRef = React.useRef(null);
+      var lidRef = React.useRef(null);
+
+      function toPreviewMesh(v, colour, yLift) {
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(v.slice(), 3));
+        geo.computeVertexNormals();
+        var k = 0.01;
+        geo.rotateX(-Math.PI / 2);
+        geo.scale(k, k, k);
+        geo.translate(0, yLift, 0);
+        return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+          color: colour, roughness: 0.62, metalness: 0.02
+        }));
+      }
 
       // Rebuild the preview mesh whenever the solid changes. The scene works
       // in units of 100 mm so the camera never has to travel far.
       React.useEffect(function () {
         var stg = stage.ref.current;
         if (!stg) return;
-        if (meshRef.current) {
-          stg.scene.remove(meshRef.current);
-          meshRef.current.geometry.dispose();
-          meshRef.current.material.dispose();
-          meshRef.current = null;
+        function clear(ref) {
+          if (!ref.current) return;
+          stg.scene.remove(ref.current);
+          ref.current.geometry.dispose();
+          ref.current.material.dispose();
+          ref.current = null;
         }
-        if (model) {
-          var geo = new THREE.BufferGeometry();
-          geo.setAttribute('position', new THREE.BufferAttribute(model.v.slice(), 3));
-          geo.computeVertexNormals();
-          // Sit the box on the origin, upright, scaled to metres-ish.
-          var k = 0.01;
-          geo.rotateX(-Math.PI / 2);
-          geo.scale(k, k, k);
-          geo.translate(0, -P.boxZ * k / 2, 0);
-          var mat = new THREE.MeshStandardMaterial({ color: colour, roughness: 0.62, metalness: 0.02 });
-          var mesh = new THREE.Mesh(geo, mat);
-          stg.scene.add(mesh);
-          meshRef.current = mesh;
+        clear(meshRef);
+        clear(lidRef);
+        var k = 0.01;
+        var showBox = view === 'box' || view === 'both';
+        var showLid = (view === 'lid' || view === 'both') && lidModel;
+        if (showBox && model) {
+          meshRef.current = toPreviewMesh(model.v, colour, -P.boxZ * k / 2);
+          stg.scene.add(meshRef.current);
+        }
+        if (showLid) {
+          // Hold the lid clear of the mouth when both are shown, skirt and all.
+          var lift = view === 'both'
+            ? P.boxZ * k / 2 + (P.lidLip + 8) * k
+            : -(P.lidT - P.lidLip) * k / 2;
+          lidRef.current = toPreviewMesh(lidModel.v, colour, lift);
+          stg.scene.add(lidRef.current);
         }
         stage.request();
-      }, [model, colour]);
+      }, [model, lidModel, colour, view, P.boxZ, P.lidLip]);
 
       // Frame the piece: enough distance that the longest side always fits.
       React.useEffect(function () {
-        var span = Math.max(P.boxX, P.boxY, P.boxZ) * 0.01;
+        var tall = P.boxZ + (P.withLid ? P.lidT + P.lidLip + 12 : 0);
+        var span = Math.max(P.boxX, P.boxY, tall) * 0.01;
         stage.cam.current.distance = clamp(span * 2.4, 0.9, 14);
         stage.cam.current.max = Math.max(14, span * 8);
         stage.request();
-      }, [P.boxX, P.boxY, P.boxZ]);
+      }, [P.boxX, P.boxY, P.boxZ, P.withLid, P.lidT, P.lidLip]);
+
+      React.useEffect(function () {
+        if (!P.withLid && view !== 'box') setView('box');
+      }, [P.withLid]);
 
       var presetValue = 'custom';
       PRESETS.forEach(function (p) {
@@ -1726,6 +2307,11 @@
         if (!model) return;
         download(new Blob([BE.toStl(model.v, 'Organizer box ' + baseName())], { type: 'model/stl' }),
           baseName() + '.stl');
+      }
+      function saveLidStl() {
+        if (!lidModel) return;
+        download(new Blob([BE.toStl(lidModel.v, 'Organizer lid ' + baseName())], { type: 'model/stl' }),
+          baseName() + '-tampa.stl');
       }
 
       var warnings = [];
@@ -1792,7 +2378,51 @@
               ),
               h('div', { className: 'hint' }, t('gridHint')),
               h('div', { className: 'hint', style: { marginTop: '6px' } },
-                t('gridHole', n2(P.holeAF), n2(2 * P.holeR)))
+                t('gridHole', n2(P.holeAF), n2(2 * P.holeR))),
+              h(Check, {
+                id: 'floorHoneycomb', label: t('floorHoneycomb'),
+                checked: o.floorHoneycomb,
+                onChange: function (v) { set('floorHoneycomb', v); }
+              })
+            ),
+
+            h('div', { className: 'card' },
+              h('h2', null, t('handlesCard')),
+              h('div', { className: 'checkgrid' },
+                h(Check, { id: 'handleYP', label: t('wallYP'), checked: o.handleYP, onChange: function (v) { set('handleYP', v); } }),
+                h(Check, { id: 'handleYN', label: t('wallYN'), checked: o.handleYN, onChange: function (v) { set('handleYN', v); } }),
+                h(Check, { id: 'handleXN', label: t('wallXN'), checked: o.handleXN, onChange: function (v) { set('handleXN', v); } }),
+                h(Check, { id: 'handleXP', label: t('wallXP'), checked: o.handleXP, onChange: function (v) { set('handleXP', v); } })
+              ),
+              h('div', { className: 'hint' }, t('handlesHint'))
+            ),
+
+            h('div', { className: 'card' },
+              h('h2', null, t('lidCard')),
+              h(Check, {
+                id: 'withLid', label: t('withLid'),
+                checked: o.withLid,
+                onChange: function (v) { set('withLid', v); if (v && view === 'box') setView('both'); }
+              }),
+              o.withLid ? h(React.Fragment, null,
+                h('div', { className: 'grid2' },
+                  h(Field, { label: t('lidT') },
+                    h(NumberInput, { value: o.lidT, min: 1, max: 12, step: 0.1, onChange: function (v) { set('lidT', v); } })),
+                  h(Field, { label: t('lidLip') },
+                    h(NumberInput, { value: o.lidLip, min: 0, max: 20, step: 0.5, onChange: function (v) { set('lidLip', v); } })),
+                  h(Field, { label: t('lidClear') },
+                    h(NumberInput, { value: o.lidClear, min: 0, max: 1.5, step: 0.05, onChange: function (v) { set('lidClear', v); } }))
+                ),
+                h(Check, {
+                  id: 'lidGrip', label: t('lidGrip'),
+                  checked: o.lidGrip, onChange: function (v) { set('lidGrip', v); }
+                }),
+                h(Check, {
+                  id: 'lidHoneycomb', label: t('lidHoneycomb'),
+                  checked: o.lidHoneycomb, onChange: function (v) { set('lidHoneycomb', v); }
+                }),
+                h('div', { className: 'hint' }, t('lidHint'))
+              ) : null
             )
           ),
 
@@ -1805,6 +2435,15 @@
               stage.failed
                 ? h('div', { className: 'alert err' }, t('error3D'))
                 : h(Stage3D, { stage: stage, t: t }),
+              P.withLid ? h('div', { className: 'seg' },
+                [['box', t('viewBox')], ['lid', t('viewLid')], ['both', t('viewBoth')]].map(function (opt) {
+                  return h('button', {
+                    key: opt[0], type: 'button',
+                    className: view === opt[0] ? 'on' : '',
+                    onClick: function () { setView(opt[0]); }
+                  }, opt[1]);
+                })
+              ) : null,
               h('div', { className: 'swatch' },
                 h('input', {
                   type: 'color', value: colour, 'aria-label': t('colour'),
@@ -1838,7 +2477,10 @@
                     viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
                     strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
                   }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
-                  t('download'))
+                  t('download')),
+                P.withLid ? h('button', {
+                  type: 'button', className: 'btn secondary grow', disabled: !lidModel, onClick: saveLidStl
+                }, t('downloadLid')) : null
               )
             )
           )

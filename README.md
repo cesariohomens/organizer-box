@@ -17,21 +17,26 @@ medidas e descarrega o STL.
 | Nervura | 1,333 mm |
 
 A célula e a nervura não acompanham o tamanho da caixa: uma caixa maior leva
-mais favos, todos do mesmo tamanho, para que peças diferentes fiquem com o
-mesmo aspecto lado a lado.
+mais favos, todos do mesmo tamanho.
 
-O favo vive entre os dois aros maciços. O de cima dá rigidez à boca; o de baixo
-fecha a parede junto ao fundo. Com o aro inferior a 0 o favo começa logo acima
-do fundo.
+## Opções
+
+- **Fundo em colmeia** — fura o fundo com a mesma grelha hexagonal
+- **Pegas nas paredes** — abre um furo hexagonal largo perto do topo em cada
+  parede que escolheres (+X, −X, +Y, −Y)
+- **Tampa** — peça sólida com uma saia inferior que encaixa na boca da caixa,
+  com profundidade e folga reguláveis. Podes combinar à vontade furação para
+  pega e malha em colmeia, ou deixar a tampa lisa. A pré-visualização 3D
+  permite ver a caixa, a tampa ou as duas, e descarregar STLs separados
 
 ## Uso
 
 1. Abre `index.html` no browser
-2. Ajusta largura, comprimento, altura, parede, fundo, aros e raio dos cantos
-3. Vê a peça em 3D e descarrega o STL binário
+2. Ajusta medidas, grelha, pegas e tampa
+3. Vê a peça em 3D e descarrega o STL
 
-A malha sai fechada e manifold, verificada por varrimento em milhares de
-combinações de medidas.
+A interface está em inglês, português, espanhol, francês, alemão, italiano,
+chinês simplificado e japonês.
 
 ## Impressão
 
