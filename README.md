@@ -24,10 +24,13 @@ mais favos, todos do mesmo tamanho.
 - **Fundo em colmeia** — fura o fundo com a mesma grelha hexagonal
 - **Pegas nas paredes** — abre um furo hexagonal largo perto do topo em cada
   parede que escolheres (+X, −X, +Y, −Y)
-- **Tampa** — peça sólida com uma saia inferior que encaixa na boca da caixa,
-  com profundidade e folga reguláveis. Podes combinar à vontade furação para
-  pega e malha em colmeia, ou deixar a tampa lisa. A pré-visualização 3D
-  permite ver a caixa, a tampa ou as duas, e descarregar STLs separados
+- **Tampa** — peça sólida que usa o mesmo encaixe das caixas: por baixo leva o
+  pé chanfrado da caixa, por cima leva o rebaixo da boca. Assenta na caixa como
+  uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa
+  fechada. A folga afina o aperto do pé conforme a impressora. Podes combinar à
+  vontade furação para pega e malha em colmeia, ou deixar a tampa lisa. A
+  pré-visualização 3D permite ver a caixa, a tampa ou as duas, e descarregar
+  STLs separados
 
 ## Uso
 
