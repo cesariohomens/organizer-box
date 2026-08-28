@@ -377,8 +377,7 @@
       viewLid: 'Tampa',
       viewBoth: 'Ambas',
       downloadLid: 'Descarregar STL da tampa',
-      downloadBoth: 'Descarregar os dois STL',
-      downloadMany: 'Descarregar {0} STL',
+      downloadZip: 'Descarregar ZIP ({0} STL)',
 
       download: 'Descarregar STL',
 
@@ -461,8 +460,7 @@
       viewLid: 'Lid',
       viewBoth: 'Both',
       downloadLid: 'Download lid STL',
-      downloadBoth: 'Download both STLs',
-      downloadMany: 'Download {0} STLs',
+      downloadZip: 'Download ZIP ({0} STLs)',
 
       download: 'Download STL',
 
@@ -545,8 +543,7 @@
       viewLid: 'Tapa',
       viewBoth: 'Ambas',
       downloadLid: 'Descargar STL de la tapa',
-      downloadBoth: 'Descargar los dos STL',
-      downloadMany: 'Descargar {0} STL',
+      downloadZip: 'Descargar ZIP ({0} STL)',
 
       download: 'Descargar STL',
 
@@ -629,8 +626,7 @@
       viewLid: 'Couvercle',
       viewBoth: 'Les deux',
       downloadLid: 'Télécharger le STL du couvercle',
-      downloadBoth: 'Télécharger les deux STL',
-      downloadMany: 'Télécharger {0} STL',
+      downloadZip: 'Télécharger le ZIP ({0} STL)',
 
       download: 'Télécharger STL',
 
@@ -713,8 +709,7 @@
       viewLid: 'Deckel',
       viewBoth: 'Beides',
       downloadLid: 'Deckel-STL herunterladen',
-      downloadBoth: 'Beide STL herunterladen',
-      downloadMany: '{0} STL herunterladen',
+      downloadZip: 'ZIP herunterladen ({0} STL)',
 
       download: 'STL herunterladen',
 
@@ -797,8 +792,7 @@
       viewLid: 'Coperchio',
       viewBoth: 'Entrambi',
       downloadLid: 'Scarica STL del coperchio',
-      downloadBoth: 'Scarica entrambi gli STL',
-      downloadMany: 'Scarica {0} STL',
+      downloadZip: 'Scarica lo ZIP ({0} STL)',
 
       download: 'Scarica STL',
 
@@ -881,8 +875,7 @@
       viewLid: '盖子',
       viewBoth: '两者',
       downloadLid: '下载盖子 STL',
-      downloadBoth: '下载两个 STL',
-      downloadMany: '下载 {0} 个 STL',
+      downloadZip: '下载 ZIP（{0} 个 STL）',
 
       download: '下载 STL',
 
@@ -965,8 +958,7 @@
       viewLid: 'ふた',
       viewBoth: '両方',
       downloadLid: 'ふたの STL をダウンロード',
-      downloadBoth: '両方の STL をダウンロード',
-      downloadMany: 'STL を {0} 件ダウンロード',
+      downloadZip: 'ZIP をダウンロード（STL {0} 件）',
 
       download: 'STL をダウンロード',
 
@@ -1281,10 +1273,13 @@
         var fit = 0.4;                          // slack so the card slides down
         var room = P.boxZ - (P.floorTop + 2) - rise - sill;
         var winH = Math.min(clamp(P.boxZ * 0.22, 10, 20), room);
-        // The two bottom corners are eased off, on the card and on the opening
-        // it shows through alike. The top stays square: that is the edge the
-        // card is pulled out by, and there is no frame along it to follow.
-        var round = clamp(Math.min(winH * 0.22, (winH - lip) * 0.4), 0.8, 3);
+        // The two bottom corners are eased off: on the card, on the opening it
+        // shows through, and on the frame's own outline, all to one radius so
+        // they read as the same curve. The post is what caps it, since the
+        // outer corner has only that much material to round away. The top
+        // stays square: that is the edge the card is pulled out by, and there
+        // is no frame along it to follow.
+        var round = clamp(Math.min(winH * 0.22, (winH - lip) * 0.4, post), 0.8, 3);
         return {
           card: card, emb: emb, slot: slot, depth: depth, rise: rise,
           sill: sill, lip: lip, post: post, fit: fit,
@@ -1363,11 +1358,28 @@
         // so only the front of the section moves: the pocket behind keeps its
         // depth right across and the card still drops straight in. Because the
         // arc only ever adds lip on top of lip, it needs no support either.
-        function arc(zBase, zL, flat, R, sign, j) {
+        // The run along the wall is blended between the two ends the arc has
+        // to land on rather than measured off the radius. Worked out from the
+        // radius it can miss the neighbouring station by a fraction of a
+        // micron, which is enough to leave a sliver of faces behind and take
+        // the shell apart.
+        function arc(zBase, zL, uEdge, uFlat, R, j) {
           var th = Math.PI * (1 + 0.5 * j / L.roundSteps);
           return {
-            u: sign * (flat - R * Math.cos(th)),
+            u: uFlat + (uEdge - uFlat) * -Math.cos(th),
             p: profile(zBase, zL + L.lip + R * (1 + Math.sin(th)), zL)
+          };
+        }
+
+        // One station along a rounded outer bottom corner. Here it is the base
+        // of the section that lifts, not the front, so the frame turns its own
+        // corner the same way the opening does. The chamfer underneath rides
+        // up with it and stays at 45 degrees, so it still needs no support.
+        function end(zTop, zBase, uEnd, uIn, R, j) {
+          var th = Math.PI * (1 + 0.5 * j / L.roundSteps);
+          return {
+            u: uIn + (uEnd - uIn) * -Math.cos(th),
+            p: profile(zBase + R * (1 + Math.sin(th)), zTop, zTop)
           };
         }
 
@@ -1415,7 +1427,7 @@
           }
         }
 
-        var made = 0, i, j, sd, outer, inner, zL, zBase, ret, post, R, flat, st;
+        var made = 0, i, j, sd, outer, inner, zL, zBase, ret, post, R, Ro, edge, flat, into, st;
         for (i = 0; i < sides.length; i++) {
           sd = sides[i];
           if (!want[sd.k] || !sd.ok) continue;
@@ -1426,14 +1438,24 @@
           post = profile(zBase, sd.zTop, sd.zTop); // post, solid to the top
 
           R = Math.min(L.round, (inner - L.lip) * 0.8);
-          flat = inner - L.lip - R;
+          edge = inner - L.lip;
+          flat = edge - R;
+          // Capped by the post, so the corner stays inside the solid ends and
+          // the run of the sweep keeps marching one way along the wall. Set
+          // out from the inner end, so that when the two meet the arc lands on
+          // the station already there instead of a hair short of it.
+          Ro = Math.min(L.round, L.post);
+          into = inner + (L.post - Ro);
 
-          st = [{ u: -outer, p: post }, { u: -inner, p: post },
-                { u: -inner, p: ret }, { u: -(inner - L.lip), p: ret }];
-          for (j = 0; j <= L.roundSteps; j++) st.push(arc(zBase, zL, flat, R, -1, j));
-          for (j = L.roundSteps; j >= 0; j--) st.push(arc(zBase, zL, flat, R, 1, j));
-          st.push({ u: inner - L.lip, p: ret }, { u: inner, p: ret },
-                  { u: inner, p: post }, { u: outer, p: post });
+          st = [];
+          for (j = 0; j <= L.roundSteps; j++) st.push(end(sd.zTop, zBase, -outer, -into, Ro, j));
+          st.push({ u: -inner, p: post },
+                  { u: -inner, p: ret }, { u: -edge, p: ret });
+          for (j = 0; j <= L.roundSteps; j++) st.push(arc(zBase, zL, -edge, -flat, R, j));
+          for (j = L.roundSteps; j >= 0; j--) st.push(arc(zBase, zL, edge, flat, R, j));
+          st.push({ u: edge, p: ret }, { u: inner, p: ret },
+                  { u: inner, p: post });
+          for (j = L.roundSteps; j >= 0; j--) st.push(end(sd.zTop, zBase, outer, into, Ro, j));
           sweepVar(sd, st);
           made++;
         }
@@ -2331,6 +2353,74 @@
         return new Uint8Array(buf);
       }
 
+      var CRC = null;
+      function crc32(data) {
+        if (!CRC) {
+          CRC = new Int32Array(256);
+          for (var i = 0; i < 256; i++) {
+            var c = i;
+            for (var b = 0; b < 8; b++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            CRC[i] = c;
+          }
+        }
+        var crc = -1;
+        for (var j = 0; j < data.length; j++) crc = (crc >>> 8) ^ CRC[(crc ^ data[j]) & 0xFF];
+        return (crc ^ -1) >>> 0;
+      }
+
+      // Stored, uncompressed ZIP. A browser stops a page after the first file
+      // unless the reader lets it send more, so the parts travel together in
+      // one download. STL is dense enough that deflating it would only buy a
+      // dependency.
+      function toZip(entries) {
+        var enc = new TextEncoder();
+        var names = [], size = 22, i;
+        for (i = 0; i < entries.length; i++) {
+          names.push(enc.encode(entries[i].name));
+          size += 76 + 2 * names[i].length + entries[i].data.length;
+        }
+
+        var buf = new ArrayBuffer(size), dv = new DataView(buf), u8 = new Uint8Array(buf);
+        var at = 0, starts = [], sums = [];
+        for (i = 0; i < entries.length; i++) {
+          var data = entries[i].data;
+          sums.push(crc32(data));
+          starts.push(at);
+          dv.setUint32(at, 0x04034b50, true);
+          dv.setUint16(at + 4, 20, true);
+          dv.setUint16(at + 12, 0x21, true);   // 1 January 1980
+          dv.setUint32(at + 14, sums[i], true);
+          dv.setUint32(at + 18, data.length, true);
+          dv.setUint32(at + 22, data.length, true);
+          dv.setUint16(at + 26, names[i].length, true);
+          at += 30;
+          u8.set(names[i], at); at += names[i].length;
+          u8.set(data, at); at += data.length;
+        }
+
+        var dir = at;
+        for (i = 0; i < entries.length; i++) {
+          dv.setUint32(at, 0x02014b50, true);
+          dv.setUint16(at + 4, 20, true);
+          dv.setUint16(at + 6, 20, true);
+          dv.setUint16(at + 14, 0x21, true);
+          dv.setUint32(at + 16, sums[i], true);
+          dv.setUint32(at + 20, entries[i].data.length, true);
+          dv.setUint32(at + 24, entries[i].data.length, true);
+          dv.setUint16(at + 28, names[i].length, true);
+          dv.setUint32(at + 42, starts[i], true);
+          at += 46;
+          u8.set(names[i], at); at += names[i].length;
+        }
+
+        dv.setUint32(at, 0x06054b50, true);
+        dv.setUint16(at + 8, entries.length, true);
+        dv.setUint16(at + 10, entries.length, true);
+        dv.setUint32(at + 12, at - dir, true);
+        dv.setUint32(at + 16, dir, true);
+        return new Blob([buf], { type: 'application/zip' });
+      }
+
 
       // A lid built from the same two features the boxes use to stack: the
       // chamfered foot underneath drops into the mouth exactly as another box
@@ -2524,7 +2614,7 @@
       root.BoxEngine = {
         DEFAULTS: D, compute: compute, build: build, buildLid: buildLid,
         labelSpec: labelSpec, labelSides: labelSides,
-        labelPlate: labelPlate, placeLabel: placeLabel, toStl: toStl
+        labelPlate: labelPlate, placeLabel: placeLabel, toStl: toStl, toZip: toZip
       };
 
     })(typeof window !== 'undefined' ? window : this);
@@ -3073,7 +3163,7 @@
       });
 
       function baseName() {
-        return 'caixa-' + Math.round(P.boxX) + 'x' + Math.round(P.boxY) + 'x' + Math.round(P.boxZ)
+        return 'box-' + Math.round(P.boxX) + 'x' + Math.round(P.boxY) + 'x' + Math.round(P.boxZ)
           + '-c' + n1(P.cell) + '-n' + n2(P.rib);
       }
       // Saves whatever the preview is showing, so the toggle above picks the
@@ -3090,18 +3180,23 @@
           queue.push([model.v, 'Organizer box ' + name, name + '.stl']);
         }
         if (wantsLid) {
-          queue.push([lidModel.v, 'Organizer lid ' + name, name + '-tampa.stl']);
+          queue.push([lidModel.v, 'Organizer lid ' + name, name + '-lid.stl']);
         }
         wantsCards.forEach(function (pl) {
           queue.push([pl.part.v, 'Organizer label ' + pl.part.text,
-            name + '-etiqueta-' + WALL_TAG[pl.wall] + '.stl']);
+            name + '-label-' + WALL_TAG[pl.wall] + '.stl']);
         });
-        // Staggered, or the browser lumps them into one blocked popup.
-        queue.forEach(function (job, i) {
-          setTimeout(function () {
-            download(new Blob([BE.toStl(job[0], job[1])], { type: 'model/stl' }), job[2]);
-          }, i * 400);
-        });
+        if (!queue.length) return;
+        // Every piece prints on its own, so each one stays its own STL. Sent
+        // one after another the browser stops all but the first, so once
+        // there is more than one they travel together in a ZIP.
+        if (queue.length === 1) {
+          download(new Blob([BE.toStl(queue[0][0], queue[0][1])], { type: 'model/stl' }), queue[0][2]);
+          return;
+        }
+        download(BE.toZip(queue.map(function (job) {
+          return { name: job[2], data: BE.toStl(job[0], job[1]) };
+        })), name + '.zip');
       }
 
       var warnings = [];
@@ -3335,9 +3430,8 @@
                     viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
                     strokeWidth: '1.9', strokeLinecap: 'round', strokeLinejoin: 'round'
                   }, h('path', { d: 'M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17' })),
-                  files > 2 || (files === 2 && !(wantsBox && wantsLid)) ? t('downloadMany', files)
-                    : (files === 2 ? t('downloadBoth')
-                      : (wantsLid ? t('downloadLid') : t('download'))))
+                  files > 1 ? t('downloadZip', files)
+                    : (wantsLid ? t('downloadLid') : t('download')))
               )
             )
           )

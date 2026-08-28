@@ -29,10 +29,11 @@ mais favos, todos do mesmo tamanho.
   entra por cima e fica à vista, presa pela soleira e pelos retornos das duas
   calhas — os três encaixes agarram 2,5 mm cada, para a moldura fechar por
   igual. A bolsa tem 2,4 mm, para uma etiqueta impressa de 2 mm. A soleira
-  leva um chanfre a 45° por baixo, por isso imprime sem suportes. Os dois
-  cantos de baixo da abertura são arredondados — a soleira sobe para as calhas
-  em arco — e o cartão faz a mesma curva; em cima ficam a direito, que é por
-  onde a etiqueta entra e se puxa. A mesma parede pode levar pega e
+  leva um chanfre a 45° por baixo, por isso imprime sem suportes. Os cantos de
+  baixo são arredondados ao mesmo raio nos três sítios: na abertura, onde a
+  soleira sobe para as calhas em arco; no contorno exterior da moldura, onde é
+  a base que sobe e o chanfre acompanha; e no cartão. Em cima ficam a direito,
+  que é por onde a etiqueta entra e se puxa. A mesma parede pode levar pega e
   porta-etiquetas: nesse caso a moldura desce para debaixo da pega. Se a caixa
   for baixa de mais para as duas coisas, a app diz quais as paredes onde não
   cabem
@@ -58,15 +59,21 @@ mais favos, todos do mesmo tamanho.
   uma caixa empilhada e ainda podes empilhar outra caixa por cima da tampa
   fechada. A folga afina o aperto do pé conforme a impressora. Podes combinar à
   vontade furação para pega e malha em colmeia, ou deixar a tampa lisa. A
-  pré-visualização 3D permite ver a caixa, a tampa ou as duas, e descarregar
-  STLs separados
+  pré-visualização 3D permite ver a caixa, a tampa ou as duas
 
 ## Uso
 
 1. Abre `index.html` no browser
 2. Ajusta medidas, grelha, pegas, porta-etiquetas e tampa
 3. Escreve o texto das etiquetas que quiseres, e dá-lhes largura e cor
-4. Vê as peças em 3D e descarrega os STL
+4. Vê as peças em 3D e descarrega-as
+
+Cada peça — a caixa, a tampa e cada etiqueta — é um STL à parte, porque cada uma
+se imprime por si, e os nomes dos ficheiros são em inglês (`box-…`, `-lid`,
+`-label-y+`). O botão descarrega o que a pré-visualização está a mostrar: uma
+peça sozinha vem em STL, mais do que uma vem num ZIP com os STL lá dentro.
+O ZIP existe porque o browser corta o segundo ficheiro quando uma página tenta
+enviar vários seguidos.
 
 A interface está em inglês, português, espanhol, francês, alemão, italiano,
 chinês simplificado e japonês.
