@@ -162,4 +162,4 @@ organizer-box/
 
 ## License
 
-Personal project. Use and remix freely for your own prints.
+[MIT](LICENSE) © 2026 Cesário Garcia Mil-Homens
